@@ -1,7 +1,7 @@
 from project.graph_info import create_graph_two_cycles
 import pydot
 import cfpq_data
-import os
+import pathlib
 
 
 class TestCreateGraphTwoCycles:
@@ -19,7 +19,7 @@ class TestCreateGraphTwoCycles:
         create_graph_two_cycles(count_nodes_first, count_nodes_second, labels)
         self.helper_comparison_graph(count_nodes_first, count_nodes_second, labels)
 
-    def test_two(self):
+    def test_three(self):
         count_nodes_first = 49
         count_nodes_second = 42
         labels = ("a", "z")
@@ -51,3 +51,9 @@ class TestCreateGraphTwoCycles:
                 and label_first != label_second
             ):
                 return False
+
+    def __del__(self):
+        path = str(pathlib.Path(__file__).parent.parent) + "/output.dot"
+        link = pathlib.Path(path)
+        if link.is_file():
+            link.unlink()
