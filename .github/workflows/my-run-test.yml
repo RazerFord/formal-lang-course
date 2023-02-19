@@ -9,20 +9,22 @@ name: My-Run-Tests
 
 on: [push]
 
+env:
+  PYTHON_VERSION: "3.10.6"
+
 jobs:
   run_tests:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Git Copy
-      uses: actions/checkout@v1
-    
-    - name: Print Start Testing
-      run: echo "Start testing"
-
-    - name: Start Tests
-      run: python3 --version
-    
-    - name: Print Completed Testing
-      run: echo "Completed testing"
-    
+    - name: Copy directory from git
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: $PYTHON_VERSION
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
