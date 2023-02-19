@@ -1,0 +1,28 @@
+#------------------------------------------------
+# GitHub Action Run Tests
+#
+# Copyleft (c) by Egor Ovchinnikov 2023.
+#
+# -----------------------------------------------
+
+name: My-Run-Tests
+
+on: [push]
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Git Copy
+      uses: actions/checkout@v1
+    
+    - name: Print Start Testing
+      run: echo "Start testing"
+
+    - name: Start Tests
+      run: python3 --version
+    
+    - name: Print Completed Testing
+      run: echo "Completed testing"
+    
