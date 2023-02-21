@@ -1,6 +1,5 @@
-import pytest
-from project.graph_info import get_info
 from graphs import graphs
+from project.graph_info import get_info
 
 
 class TestGetInfo:
@@ -19,9 +18,10 @@ class TestGetInfo:
     def test_graph_gzip(self):
         assert self.helper_check_graph("gzip")
 
-    def helper_check_graph(self, graph):
-        num_node, num_edge, true_labels = graphs[graph].values()
-        count_node, count_edge, labels = get_info(graph)
-        return (
-            num_node == count_node and num_edge == count_edge and true_labels == labels
+    def helper_check_graph(self, name):
+        num_node, num_edge, true_labels = graphs[name].values()
+        num_node_s, num_edge_s, labels = get_info(name)
+        is_equal = (
+            num_node == num_node_s and num_edge == num_edge_s and true_labels == labels
         )
+        return is_equal
