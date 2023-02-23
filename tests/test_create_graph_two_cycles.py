@@ -26,6 +26,20 @@ class TestCreateGraphTwoCycles:
         create_graph_two_cycles(num_node_first, num_node_second, labels)
         self.helper_comparison_graph(num_node_first, num_node_second, labels)
 
+    def test_four(self):
+        num_node_first = 30
+        num_node_second = 30
+        labels = ("x", "z")
+        create_graph_two_cycles(num_node_first, num_node_second, labels)
+        self.helper_comparison_graph(num_node_first, num_node_second, labels)
+
+    def test_five(self):
+        num_node_first = 300
+        num_node_second = 99
+        labels = ("g", "z")
+        create_graph_two_cycles(num_node_first, num_node_second, labels)
+        self.helper_comparison_graph(num_node_first, num_node_second, labels)
+
     def helper_comparison_graph(
         self, num_node_first, num_nodes_secod, labels, file_name="output.dot"
     ):
