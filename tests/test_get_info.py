@@ -1,5 +1,5 @@
 from graphs import graphs
-from project.graph_info import get_info
+from project.graph_info import get_graph_info_by_name
 
 
 class TestGetInfo:
@@ -20,7 +20,7 @@ class TestGetInfo:
 
     def helper_check_graph(self, name):
         num_node, num_edge, true_labels = graphs[name].values()
-        num_node_s, num_edge_s, labels = get_info(name)
+        num_node_s, num_edge_s, labels = get_graph_info_by_name(name)
         is_equal = (
             num_node == num_node_s and num_edge == num_edge_s and true_labels == labels
         )
