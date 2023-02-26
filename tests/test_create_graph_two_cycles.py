@@ -1,4 +1,4 @@
-from project.graph_info import create_graph_two_cycles
+from project.graph_info import create_and_save_graph_two_cycles
 import pydot
 import cfpq_data
 import pathlib
@@ -9,25 +9,39 @@ class TestCreateGraphTwoCycles:
         num_node_first = 3
         num_node_second = 2
         labels = ("a", "b")
-        create_graph_two_cycles(num_node_first, num_node_second, labels)
+        create_and_save_graph_two_cycles(num_node_first, num_node_second, labels)
         self.helper_comparison_graph(num_node_first, num_node_second, labels)
 
     def test_two(self):
         num_node_first = 6
         num_node_second = 4
         labels = ("x", "z")
-        create_graph_two_cycles(num_node_first, num_node_second, labels)
+        create_and_save_graph_two_cycles(num_node_first, num_node_second, labels)
         self.helper_comparison_graph(num_node_first, num_node_second, labels)
 
     def test_three(self):
         num_node_first = 49
         num_node_second = 42
         labels = ("a", "z")
-        create_graph_two_cycles(num_node_first, num_node_second, labels)
+        create_and_save_graph_two_cycles(num_node_first, num_node_second, labels)
+        self.helper_comparison_graph(num_node_first, num_node_second, labels)
+
+    def test_four(self):
+        num_node_first = 30
+        num_node_second = 30
+        labels = ("x", "z")
+        create_and_save_graph_two_cycles(num_node_first, num_node_second, labels)
+        self.helper_comparison_graph(num_node_first, num_node_second, labels)
+
+    def test_five(self):
+        num_node_first = 300
+        num_node_second = 99
+        labels = ("g", "z")
+        create_and_save_graph_two_cycles(num_node_first, num_node_second, labels)
         self.helper_comparison_graph(num_node_first, num_node_second, labels)
 
     def helper_comparison_graph(
-        self, num_node_first, num_nodes_secod, labels, file_name="output.dot"
+        self, num_node_first, num_nodes_secod, labels, file_name="out.dot"
     ):
         graph_file = pydot.graph_from_dot_file(file_name)[0]
         graph = cfpq_data.labeled_two_cycles_graph(
@@ -55,7 +69,7 @@ class TestCreateGraphTwoCycles:
                 return False
 
     def __del__(self):
-        path = str(pathlib.Path(__file__).parent.parent) + "/output.dot"
+        path = str(pathlib.Path(__file__).parent.parent) + "/out.dot"
         link = pathlib.Path(path)
         if link.is_file():
             link.unlink()
