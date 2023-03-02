@@ -1,0 +1,3 @@
+class TestCreateNonDeterministicAutomatonFromGraph:
+    def test_automata_from(self):
+        ...
