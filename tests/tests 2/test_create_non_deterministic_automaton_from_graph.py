@@ -1,7 +1,8 @@
 from graph import graph
-from networkx import MultiDiGraph
+from networkx import MultiDiGraph, single_source_shortest_path
 from project.finite_automata import create_non_deterministic_automaton_from_graph
 from pyformlang.finite_automaton import Epsilon
+from numpy import argmax
 import cfpq_data
 
 
@@ -33,3 +34,17 @@ class TestCreateNonDeterministicAutomatonFromGraph:
         for u, v, ddict in graph.edges(data=True):
             l = ddict.get("label", eps)
             assert enfa.accepts([l])
+
+    def test_label_on_path_automata_from_graph_cfpq_data(self):
+        graph_path = cfpq_data.download("skos")
+        graph = cfpq_data.graph_from_csv(graph_path)
+        list_paths = single_source_shortest_path(graph, 0)
+        arg_max_len = argmax([len(p) for _, p in list_paths.items()])
+        path = list(list_paths.items())[arg_max_len][1]
+        eps = Epsilon()
+        labels = []
+        for u, v in zip(path, path[1:]):
+            label = graph.get_edge_data(u, v, key=0).get("label", eps)
+            labels.append(label)
+        enfa = create_non_deterministic_automaton_from_graph(graph)
+        assert enfa.accepts(labels)
