@@ -10,12 +10,38 @@ from networkx import MultiDiGraph
 def create_deterministic_automaton_from_regex(
     regex_expr: str,
 ) -> DeterministicFiniteAutomaton:
+    """
+    Parameters
+    ----------
+    regex_expr : str
+        Regular expression written as a string
+
+    Returns
+    ----------
+    DeterministicFiniteAutomaton
+        Return minimum DFA
+    """
     return Regex(regex_expr).to_epsilon_nfa().minimize()
 
 
 def create_non_deterministic_automaton_from_graph(
     graph: MultiDiGraph, start_nodes: list = None, final_nodes: list = None
 ) -> EpsilonNFA:
+    """
+    Parameters
+    ----------
+    graph : MultiDiGraph
+        The graph from which nfa is built
+    start_nodes : list
+        List of starting nodes
+    final_nodes : list
+        List of final nodes
+
+    Returns
+    ----------
+    EpsilonNFA
+        Return NFA
+    """
     enfa = EpsilonNFA()
     states = graph.nodes
 
