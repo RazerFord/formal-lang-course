@@ -5,7 +5,6 @@ from pyformlang.finite_automaton import (
 )
 from pyformlang.regular_expression import Regex
 from networkx import MultiDiGraph
-import cfpq_data
 
 
 def create_deterministic_automaton_from_regex(
