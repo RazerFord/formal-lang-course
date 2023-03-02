@@ -4,47 +4,30 @@ from expressions import tests
 
 
 class TestCreateDeterministicAutomatonFromRegex:
-    def test_one(self):
+    def test_one_union(self):
         regex_expr = "|".join(tests[0]["expressions"])
+        self.helper(regex_expr, 0)
+
+    def test_concatenation(self):
+        regex_expr = ".".join(tests[1]["expressions"])
+        self.helper(regex_expr, 1)
+
+    def test_union_and_concatenation(self):
+        regex_expr = "|".join(tests[2]["expressions"])
+        self.helper(regex_expr, 2)
+
+    def helper(self, regex_expr: str, number: int):
         automaton = create_deterministic_automaton_from_regex(regex_expr)
         regex = Regex(regex_expr)
 
-        for word in tests[0]["regex_true"]:
-            assert regex.accepts(word) == automaton.accepts(word) and regex.accepts(
-                word
-            )
+        for word in tests[number]["regex_true"]:
+            r_word = regex.accepts(word)
+            a_word = automaton.accepts(word)
 
-        for word in tests[0]["regex_false"]:
-            assert regex.accepts(word) == automaton.accepts(word) and not regex.accepts(
-                word
-            )
+            assert r_word == a_word and r_word
 
-    def test_two(self):
-        regex_expr = "|".join(tests[1]["expressions"])
-        automaton = create_deterministic_automaton_from_regex(regex_expr)
-        regex = Regex(regex_expr)
+        for word in tests[number]["regex_false"]:
+            r_word = regex.accepts(word)
+            a_word = automaton.accepts(word)
 
-        for word in tests[1]["regex_true"]:
-            assert regex.accepts(word) == automaton.accepts(word) and regex.accepts(
-                word
-            )
-
-        for word in tests[1]["regex_false"]:
-            assert regex.accepts(word) == automaton.accepts(word) and not regex.accepts(
-                word
-            )
-
-    def test_three(self):
-        regex_expr = ".".join(tests[2]["expressions"])
-        automaton = create_deterministic_automaton_from_regex(regex_expr)
-        regex = Regex(regex_expr)
-
-        for word in tests[2]["regex_true"]:
-            assert regex.accepts(word) == automaton.accepts(word) and regex.accepts(
-                word
-            )
-
-        for word in tests[2]["regex_false"]:
-            assert regex.accepts(word) == automaton.accepts(word) and not regex.accepts(
-                word
-            )
+            assert r_word == a_word and not r_word

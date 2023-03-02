@@ -33,24 +33,6 @@ tests = [
     },
     {
         "expressions": [
-            "car.car",
-            "a.b.c.z*",
-            "career",
-        ],
-        "regex_true": [
-            ["car", "car"],
-            ["career"],
-            ["a", "b", "c", "z"],
-        ],
-        "regex_false": [
-            ["car"],
-            ["a", "b", "z"],
-            ["a", "b", "c", ""],
-            ["car.", "car"],
-        ],
-    },
-    {
-        "expressions": [
             "a",
             "b*",
             "c",
@@ -65,6 +47,24 @@ tests = [
             ["b", "c", "a"],
             ["c", "a", "b"],
             ["c", "b", "a"],
+        ],
+    },
+    {
+        "expressions": [
+            "car.car",
+            "a.b.c.z*",
+            "career",
+        ],
+        "regex_true": [
+            ["car", "car"],
+            ["career"],
+            ["a", "b", "c", "z"],
+        ],
+        "regex_false": [
+            ["car"],
+            ["a", "b", "z"],
+            ["a", "b", "c", ""],
+            ["car.", "car"],
         ],
     },
 ]
