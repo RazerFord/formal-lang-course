@@ -15,14 +15,11 @@ class TestCreateNonDeterministicAutomatonFromGraph:
 
         for u, v, l in zip(start_nodes, final_nodes, labels):
             gr.add_edge(u, v, label=l)
-
         enfa = create_non_deterministic_automaton_from_graph(
             gr, start_nodes, final_nodes
         )
-
         for label in labels:
             assert enfa.accepts([label])
-
         path = [x for x in labels]
         assert enfa.accepts(path)
 
@@ -31,7 +28,8 @@ class TestCreateNonDeterministicAutomatonFromGraph:
         graph = cfpq_data.graph_from_csv(graph_path)
         enfa = create_non_deterministic_automaton_from_graph(graph)
         eps = Epsilon()
-        for u, v, ddict in graph.edges(data=True):
+
+        for _, _, ddict in graph.edges(data=True):
             l = ddict.get("label", eps)
             assert enfa.accepts([l])
 
@@ -43,8 +41,10 @@ class TestCreateNonDeterministicAutomatonFromGraph:
         path = list(list_paths.items())[arg_max_len][1]
         eps = Epsilon()
         labels = []
+
         for u, v in zip(path, path[1:]):
             label = graph.get_edge_data(u, v, key=0).get("label", eps)
             labels.append(label)
+
         enfa = create_non_deterministic_automaton_from_graph(graph)
         assert enfa.accepts(labels)
