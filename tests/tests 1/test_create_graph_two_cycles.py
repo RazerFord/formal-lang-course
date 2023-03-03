@@ -69,7 +69,7 @@ class TestCreateGraphTwoCycles:
                 return False
 
     def __del__(self):
-        path = str(pathlib.Path(__file__).parent.parent) + "/out.dot"
+        path = str(pathlib.Path(__file__).parent.parent.parent) + "/out.dot"
         link = pathlib.Path(path)
         if link.is_file():
             link.unlink()
