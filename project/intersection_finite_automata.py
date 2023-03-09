@@ -34,16 +34,28 @@ def get_intersection_two_finite_automata(
     for symbol in symbols:
         mtrxes[symbol] = sp.kron(fst_decomposition[symbol], snd_decomposition[symbol])
 
+    number = len(snd_automata.states)
     for key, mtrx in mtrxes.items():
         for i, row in enumerate(mtrx.toarray()):
             for j, val in enumerate(row):
                 if val == True:
-                    enfa.add_transition(i, key, j)
-
+                    fr = get_state(i, number)
+                    to = get_state(j, number)
+                    enfa.add_transition(fr, key, to)
     return enfa
 
 
-def get_intersection_states(fst_states: list[State], snd_states: list[State]):
+def get_state(i: int, n: int) -> State:
+    return combine_state_pair(State(i // n), State(i % n))
+
+
+def combine_state_pair(fst_state: State, snd_state: State) -> State:
+    return State(str(fst_state.value) + "; " + str(snd_state.value))
+
+
+def get_intersection_states(
+    fst_states: list[State], snd_states: list[State]
+) -> list[list[State]]:
     mtrx = []
     for i, fst in enumerate(fst_states):
         mtrx.append([])
@@ -52,15 +64,13 @@ def get_intersection_states(fst_states: list[State], snd_states: list[State]):
     return mtrx
 
 
-def combine_state_pair(fst_state, snd_state):
-    return State(str(fst_state.value) + "; " + str(snd_state.value))
-
-
-def states_to_list_int(states: list[int]):
+def states_to_list_int(states: list[int]) -> list[int]:
     return [x.value for x in list(states)]
 
 
-def get_boolean_decomposition(automata: DeterministicFiniteAutomaton, symbols: set):
+def get_boolean_decomposition(
+    automata: DeterministicFiniteAutomaton, symbols: set
+) -> dict[str, sp.lil_matrix]:
     decomposition = {}
     number_states = len(automata.states)
 
@@ -104,8 +114,9 @@ enfa_query = create_dfa_query()
 jjj = get_intersection_two_finite_automata(enfa_db, enfa_query)
 
 obj = enfa_db.get_intersection(enfa_query)
-print(jjj.to_networkx().edges(data=True))
-print(obj.to_networkx().edges(data=True))
+# print(jjj.to_networkx().edges(data=True))
+# print(obj.to_networkx().edges(data=True))
+print(jjj == obj)
 # print(obj.final_states)
 # print()
 # print(obj.to_networkx().nodes())
