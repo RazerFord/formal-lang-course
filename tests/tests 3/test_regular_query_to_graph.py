@@ -9,7 +9,7 @@ class TestRegularQueryToGraph:
             "a|b", graph, list(set(start_nodes)), list(set(final_nodes))
         )
         fst, snd = data[0]
-        assert (fst[-1], snd[-1]) == ('0', '0')
+        assert (fst[-1], snd[-1]) == ("0", "0")
 
     def init_graph(self):
         gr = nx.MultiDiGraph()

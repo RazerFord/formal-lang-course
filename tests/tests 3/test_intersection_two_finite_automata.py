@@ -8,7 +8,7 @@ class TestIntersectionTwoFiniteAutomata:
     def test_intersect_from_graph(self):
         fst_dfa = self.create_dfa_fst()
         snd_dfa = self.create_dfa_snd()
-        
+
         my_intersection = get_intersection_two_finite_automata(fst_dfa, snd_dfa)
         intersection = fst_dfa.get_intersection(snd_dfa)
         assert my_intersection == intersection
@@ -30,7 +30,6 @@ class TestIntersectionTwoFiniteAutomata:
         my_intersection = get_intersection_two_finite_automata(snd_dfa, fst_dfa)
         intersection = snd_dfa.get_intersection(fst_dfa)
         assert my_intersection == intersection
-
 
     def create_dfa_fst(self):
         gr = nx.MultiDiGraph()
