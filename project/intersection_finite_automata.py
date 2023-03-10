@@ -233,11 +233,11 @@ def regular_query_to_graph(
         List of start nodes
     final_nodes : list[State]
         List of final nodes
-        
+
     Returns
     ----------
     list[tuple[State, State]]
-        Returns a list of pairs such that the first 
+        Returns a list of pairs such that the first
         element of each pair is reachable from the second
     """
     dfa_from_reg = fa.create_deterministic_automaton_from_regex(regex_expr)
