@@ -1,8 +1,34 @@
 import scipy.sparse as sp
+import finite_automata as fa
 from networkx import MultiDiGraph
-from finite_automata import create_non_deterministic_automaton_from_graph
 from pyformlang.finite_automaton import DeterministicFiniteAutomaton
-from pyformlang.finite_automaton import State, EpsilonNFA
+from pyformlang.finite_automaton import State
+from pyformlang.finite_automaton import EpsilonNFA
+
+
+class Mapping:
+    def __init__(self, states: list[State]):
+        self.states = list(states)
+        self._mapp = self._init_mapping()
+        self._invert_mapp = self._init_invert_mapping()
+
+    def _init_mapping(self):
+        mapp = {}
+        for k, state in enumerate(self.states):
+            mapp[state] = k
+        return mapp
+
+    def _init_invert_mapping(self):
+        mapp = {}
+        for k, state in enumerate(self.states):
+            mapp[k] = state
+        return mapp
+
+    def get_map(self) -> dict[State, int]:
+        return self._mapp
+
+    def get_imap(self) -> dict[int, State]:
+        return self._invert_mapp
 
 
 def get_intersection_two_finite_automata(
@@ -27,26 +53,32 @@ def get_intersection_two_finite_automata(
 
     symbols = set(list(fst_automata.symbols) + list(snd_automata.symbols))
 
-    fst_decomposition = get_boolean_decomposition(fst_automata, symbols)
-    snd_decomposition = get_boolean_decomposition(snd_automata, symbols)
+    fst_decomposition, fst_map = get_boolean_decomposition_and_map(
+        fst_automata, symbols
+    )
+    snd_decomposition, snd_map = get_boolean_decomposition_and_map(
+        snd_automata, symbols
+    )
 
     mtrxes = {}
     for symbol in symbols:
         mtrxes[symbol] = sp.kron(fst_decomposition[symbol], snd_decomposition[symbol])
 
-    number = len(snd_automata.states)
+    num = len(snd_automata.states)
+    fst_imp = fst_map.get_imap()
+    snd_imp = snd_map.get_imap()
     for key, mtrx in mtrxes.items():
         for i, row in enumerate(mtrx.toarray()):
             for j, val in enumerate(row):
                 if val == True:
-                    fr = get_state(i, number)
-                    to = get_state(j, number)
+                    fr = combine_state_pair(
+                        State(fst_imp[i // num]), State(snd_imp[i % num])
+                    )
+                    to = combine_state_pair(
+                        State(fst_imp[j // num]), State(snd_imp[j % num])
+                    )
                     enfa.add_transition(fr, key, to)
     return enfa
-
-
-def get_state(i: int, n: int) -> State:
-    return combine_state_pair(State(i // n), State(i % n))
 
 
 def combine_state_pair(fst_state: State, snd_state: State) -> State:
@@ -68,55 +100,90 @@ def states_to_list_int(states: list[int]) -> list[int]:
     return [x.value for x in list(states)]
 
 
-def get_boolean_decomposition(
+def get_boolean_decomposition_and_map(
     automata: DeterministicFiniteAutomaton, symbols: set
-) -> dict[str, sp.lil_matrix]:
+) -> tuple[dict[str, sp.lil_matrix], Mapping]:
     decomposition = {}
     number_states = len(automata.states)
 
     for label in symbols:
         decomposition[label] = sp.lil_matrix((number_states, number_states), dtype=int)
 
+    mapp = Mapping(automata.states)
+    mp = mapp.get_map()
+
     for u, l, v in automata:
-        decomposition[l.value][u.value, v.value] = 1
+        decomposition[l.value][mp[u.value], mp[v.value]] = 1
 
-    return decomposition
-
-
-def create_dfa_db():
-    gr = MultiDiGraph()
-    start_nodes = [0, 1]
-    final_nodes = [1, 0]
-    labels = ["a", "b"]
-
-    for u, v, l in zip(start_nodes, final_nodes, labels):
-        gr.add_edge(u, v, label=l)
-    enfa = create_non_deterministic_automaton_from_graph(gr, start_nodes, final_nodes)
-    return enfa
+    return decomposition, mapp
 
 
-def create_dfa_query():
-    gr = MultiDiGraph()
-    start_nodes = [0, 0]
-    final_nodes = [0, 0]
-    labels = ["a", "b"]
-
-    for u, v, l in zip(start_nodes, final_nodes, labels):
-        gr.add_edge(u, v, label=l)
-    enfa = create_non_deterministic_automaton_from_graph(
-        gr, list(set(start_nodes)), list(set(final_nodes))
+def regular_query_to_graph(
+    regex_expr: str,
+    graph: MultiDiGraph,
+    start_nodes: list = None,
+    final_nodes: list = None,
+) -> EpsilonNFA:
+    dfa_from_reg = fa.create_deterministic_automaton_from_regex(regex_expr)
+    dfa_from_graph = fa.create_non_deterministic_automaton_from_graph(
+        graph, start_nodes, final_nodes
     )
-    return enfa
+    dfa_intersection = get_intersection_two_finite_automata(
+        dfa_from_reg, dfa_from_graph
+    )
+    # graph = dfa_intersection.to_networkx()
 
 
-enfa_db = create_dfa_db()
-enfa_query = create_dfa_query()
-jjj = get_intersection_two_finite_automata(enfa_db, enfa_query)
+gr = MultiDiGraph()
+start_nodes = [0, 0]
+final_nodes = [0, 0]
+labels = ["a", "b"]
 
-obj = enfa_db.get_intersection(enfa_query)
-# print(jjj.to_networkx().edges(data=True))
-# print(obj.to_networkx().edges(data=True))
-print(jjj == obj)
-# print(obj.final_states)
-# print()
-# print(obj.to_networkx().nodes())
+for u, v, l in zip(start_nodes, final_nodes, labels):
+    gr.add_edge(u, v, label=l)
+
+
+# enfa = fa.create_non_deterministic_automaton_from_graph(
+#     gr, list(set(start_nodes)), list(set(final_nodes))
+# )
+regular_query_to_graph("a|b", gr, list(set(start_nodes)), list(set(final_nodes)))
+##############
+# def create_dfa_db():
+#     gr = MultiDiGraph()
+#     start_nodes = [0, 1]
+#     final_nodes = [1, 0]
+#     labels = ["a", "b"]
+
+#     for u, v, l in zip(start_nodes, final_nodes, labels):
+#         gr.add_edge(u, v, label=l)
+#     enfa = fa.create_non_deterministic_automaton_from_graph(
+#         gr, start_nodes, final_nodes
+#     )
+#     return enfa
+
+
+# def create_dfa_query():
+#     gr = MultiDiGraph()
+#     start_nodes = [0, 0]
+#     final_nodes = [0, 0]
+#     labels = ["a", "b"]
+
+#     for u, v, l in zip(start_nodes, final_nodes, labels):
+#         gr.add_edge(u, v, label=l)
+#     enfa = fa.create_non_deterministic_automaton_from_graph(
+#         gr, list(set(start_nodes)), list(set(final_nodes))
+#     )
+#     return enfa
+
+
+# enfa_db = create_dfa_db()
+# enfa_query = create_dfa_query()
+# jjj = get_intersection_two_finite_automata(enfa_db, enfa_query)
+
+# obj = enfa_db.get_intersection(enfa_query)
+# # print(jjj.to_networkx().edges(data=True))
+# # print(obj.to_networkx().edges(data=True))
+# print(jjj == obj)
+# # print(obj.final_states)
+# # print()
+# # print(obj.to_networkx().nodes())
