@@ -1,5 +1,5 @@
 import scipy.sparse as sp
-import finite_automata as fa
+import project.finite_automata as fa
 import networkx as nx
 from pyformlang.finite_automaton import DeterministicFiniteAutomaton
 from pyformlang.finite_automaton import State
@@ -7,27 +7,51 @@ from pyformlang.finite_automaton import EpsilonNFA
 
 
 class Mapping:
+    """
+    Creates a dictionary mapping the state value to a
+    number from zero, and a dictionary mapping numbers to
+    states
+
+    Parameters
+    ----------
+    states : list[State]
+        All states in the graph that is passed to the class
+    """
+
     def __init__(self, states: list[State]):
         self.states = list(states)
-        self._mapp = self._init_mapping()
-        self._invert_mapp = self._init_invert_mapping()
+        self._mapp, self._invert_mapp = self._init_mapping()
 
     def _init_mapping(self):
         mapp = {}
+        imapp = {}
         for k, state in enumerate(self.states):
             mapp[state] = k
-        return mapp
-
-    def _init_invert_mapping(self):
-        mapp = {}
-        for k, state in enumerate(self.states):
-            mapp[k] = state
-        return mapp
+            imapp[k] = state
+        return mapp, imapp
 
     def get_map(self) -> dict[State, int]:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        dict[State, int]
+            Returns a dictionary mapping the state value to a number
+        """
         return self._mapp
 
     def get_imap(self) -> dict[int, State]:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        dict[State, int]
+            Returns a dictionary representing numbers in states
+        """
         return self._invert_mapp
 
 
@@ -136,60 +160,5 @@ def regular_query_to_graph(
     for start in dfa_intersection.start_states:
         for final in dfa_intersection.final_states:
             if nx.has_path(graph, start, final):
-                pairs.append((start, final))
+                pairs.append((start.value, final.value))
     return pairs
-
-
-gr = nx.MultiDiGraph()
-start_nodes = [0, 0]
-final_nodes = [0, 0]
-labels = ["a", "b"]
-
-for u, v, l in zip(start_nodes, final_nodes, labels):
-    gr.add_edge(u, v, label=l)
-
-
-# enfa = fa.create_non_deterministic_automaton_from_graph(
-#     gr, list(set(start_nodes)), list(set(final_nodes))
-# )
-regular_query_to_graph("a|b", gr, list(set(start_nodes)), list(set(final_nodes)))
-##############
-# def create_dfa_db():
-#     gr = nx.MultiDiGraph()
-#     start_nodes = [0, 1]
-#     final_nodes = [1, 0]
-#     labels = ["a", "b"]
-
-#     for u, v, l in zip(start_nodes, final_nodes, labels):
-#         gr.add_edge(u, v, label=l)
-#     enfa = fa.create_non_deterministic_automaton_from_graph(
-#         gr, start_nodes, final_nodes
-#     )
-#     return enfa
-
-
-# def create_dfa_query():
-#     gr = nx.MultiDiGraph()
-#     start_nodes = [0, 0]
-#     final_nodes = [0, 0]
-#     labels = ["a", "b"]
-
-#     for u, v, l in zip(start_nodes, final_nodes, labels):
-#         gr.add_edge(u, v, label=l)
-#     enfa = fa.create_non_deterministic_automaton_from_graph(
-#         gr, list(set(start_nodes)), list(set(final_nodes))
-#     )
-#     return enfa
-
-
-# enfa_db = create_dfa_db()
-# enfa_query = create_dfa_query()
-# jjj = get_intersection_two_finite_automata(enfa_db, enfa_query)
-
-# obj = enfa_db.get_intersection(enfa_query)
-# # print(jjj.to_networkx().edges(data=True))
-# # print(obj.to_networkx().edges(data=True))
-# print(jjj == obj)
-# # print(obj.final_states)
-# # print()
-# # print(obj.to_networkx().nodes())
