@@ -1,6 +1,6 @@
 import scipy.sparse as sp
 import finite_automata as fa
-from networkx import MultiDiGraph
+import networkx as nx
 from pyformlang.finite_automaton import DeterministicFiniteAutomaton
 from pyformlang.finite_automaton import State
 from pyformlang.finite_automaton import EpsilonNFA
@@ -120,10 +120,10 @@ def get_boolean_decomposition_and_map(
 
 def regular_query_to_graph(
     regex_expr: str,
-    graph: MultiDiGraph,
+    graph: nx.MultiDiGraph,
     start_nodes: list = None,
     final_nodes: list = None,
-) -> EpsilonNFA:
+) -> list[tuple[State, State]]:
     dfa_from_reg = fa.create_deterministic_automaton_from_regex(regex_expr)
     dfa_from_graph = fa.create_non_deterministic_automaton_from_graph(
         graph, start_nodes, final_nodes
@@ -131,10 +131,16 @@ def regular_query_to_graph(
     dfa_intersection = get_intersection_two_finite_automata(
         dfa_from_reg, dfa_from_graph
     )
-    # graph = dfa_intersection.to_networkx()
+    pairs = []
+    graph = dfa_intersection.to_networkx()
+    for start in dfa_intersection.start_states:
+        for final in dfa_intersection.final_states:
+            if nx.has_path(graph, start, final):
+                pairs.append((start, final))
+    return pairs
 
 
-gr = MultiDiGraph()
+gr = nx.MultiDiGraph()
 start_nodes = [0, 0]
 final_nodes = [0, 0]
 labels = ["a", "b"]
@@ -149,7 +155,7 @@ for u, v, l in zip(start_nodes, final_nodes, labels):
 regular_query_to_graph("a|b", gr, list(set(start_nodes)), list(set(final_nodes)))
 ##############
 # def create_dfa_db():
-#     gr = MultiDiGraph()
+#     gr = nx.MultiDiGraph()
 #     start_nodes = [0, 1]
 #     final_nodes = [1, 0]
 #     labels = ["a", "b"]
@@ -163,7 +169,7 @@ regular_query_to_graph("a|b", gr, list(set(start_nodes)), list(set(final_nodes))
 
 
 # def create_dfa_query():
-#     gr = MultiDiGraph()
+#     gr = nx.MultiDiGraph()
 #     start_nodes = [0, 0]
 #     final_nodes = [0, 0]
 #     labels = ["a", "b"]
