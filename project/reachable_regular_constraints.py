@@ -12,53 +12,68 @@ def get_reachable_vertices(
     labels_gr = parse_labels(graph)
     labels_fa = automata.symbols
 
-    matrix_fa, mapp = get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
-    matrix_gr, _ = get_boolean_decomposition_and_map_for_graph(labels_gr, gr)
-    ...
+    matrix_fa, mp_fa = get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
+    matrix_gr, mp_gr = get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
+    labels = labels_fa.intersection(labels_gr)
+    matrices = combine_matrix(matrix_fa, matrix_gr, labels)
+
+
+
+def combine_matrix(
+    matrix_fa: dict[str, sp.lil_matrix],
+    matrix_gr: dict[str, sp.lil_matrix],
+    labels: set,
+) -> dict[str, sp.lil_matrix]:
+    matrices = {}
+    for l in labels:
+        number_rows_fa, number_colmn_fa = matrix_fa[l].shape
+        number_rows_gr, number_colmn_gr = matrix_gr[l].shape
+        add_to_fa = sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=int)
+        add_to_gr = sp.lil_matrix((number_rows_gr, number_colmn_fa), dtype=int)
+        add_matrix_fa = sp.hstack([matrix_fa[l], add_to_fa])
+        add_matrix_gr = sp.hstack([add_to_gr, matrix_gr[l]])
+        matrices[l] = sp.vstack([add_matrix_fa, add_matrix_gr])
+    return matrices
+
+
+def get_boolean_decomposition_and_map_for_graph(
+    symbols: set, graph: nx.MultiDiGraph
+) -> tuple[dict[str, sp.lil_matrix], Mapping]:
+    decomposition, mapp = init_mapping_and_matrix(symbols, sorted(graph.nodes))
+
+    mp = mapp.get_map()
+    for u, v, ddict in graph.edges(data=True):
+        label = ddict.get("label", None)
+        if label is not None:
+            decomposition[label][mp[u], mp[v]] = 1
+
+    return decomposition, mapp
 
 
 def get_boolean_decomposition_and_map_for_fa(
     symbols: set, automata: fa.DeterministicFiniteAutomaton
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
-    decomposition = {}
-    number_states = len(automata.states)
-
-    for label in symbols:
-        decomposition[label] = sp.lil_matrix((number_states, number_states), dtype=int)
-
-    mapp = Mapping(automata.states)
+    decomposition, mapp = init_mapping_and_matrix(symbols, list(automata.states))
+    
     mp = mapp.get_map()
-
     for u, l, v in automata:
         decomposition[l.value][mp[u.value], mp[v.value]] = 1
+
     return decomposition, mapp
 
-def get_boolean_decomposition_and_map_for_graph(
-    symbols: set, automata: fa.DeterministicFiniteAutomaton
+
+def init_mapping_and_matrix(
+    symbols: list, labels: list
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
-    decomposition = {}
-    number_states = len(automata.states)
-
-    for label in symbols:
-        decomposition[label] = sp.lil_matrix((number_states, number_states), dtype=int)
-
-    mapp = Mapping(automata.states)
-    mp = mapp.get_map()
-
-    for u, l, v in automata:
-        decomposition[l.value][mp[u.value], mp[v.value]] = 1
-    return decomposition, mapp
-
-def get_boolean_decomposition_and_map(symbols: list, labels: list):
     decomposition = {}
     number_labels = len(labels)
 
     for label in symbols:
-        decomposition[label] = sp.lil_matrix((number_states, number_states), dtype=int)
+        decomposition[label] = sp.lil_matrix((number_labels, number_labels), dtype=int)
+    mp = Mapping(labels)
 
-    mapp = Mapping(automata.states)
-    mp = mapp.get_map()
-    ...
+    return decomposition, mp
+
 
 def init_graph():
     gr = nx.MultiDiGraph()
@@ -69,17 +84,25 @@ def init_graph():
     gr.add_edge(2, 0, label="a")
     return gr
 
+
 def init_regex():
     gr = fa.DeterministicFiniteAutomaton()
     gr.add_start_state(0)
     gr.add_final_state(2)
-    gr.add_transition(0, 'b', 0)
-    gr.add_transition(0, 'a', 1)
-    gr.add_transition(1, 'b', 2)
+    gr.add_transition(0, "b", 0)
+    gr.add_transition(0, "a", 1)
+    gr.add_transition(1, "b", 2)
     return gr
+
 
 gr = init_graph()
 rx = init_regex()
-mx = get_boolean_decomposition_and_map_for_fa(rx.symbols, rx)
-print(mx[0]['b'].toarray())
+# print(gr.nodes())
+# print(list(rx.states))
+# mx = get_boolean_decomposition_and_map_for_fa(rx.symbols, rx)
+# print(mx[0]["a"].toarray())
+# mx = get_boolean_decomposition_and_map_for_graph(parse_labels(gr), gr)
+# print(mx[0]["a"].toarray())
+# print(mx[0]['b'].toarray())
+
 get_reachable_vertices(gr, rx)
