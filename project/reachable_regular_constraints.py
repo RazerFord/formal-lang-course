@@ -24,19 +24,20 @@ def get_reachable_vertices(
     offset, _ = matrix_transition.shape
     mp = mp_fa.get_map()
 
-    prev = matrix_transition.copy()
+    visibles = sp.lil_matrix(matrix_transition, dtype=bool)
     for start in automata.start_states:
         indx = mp[start]
         for node in start_nodes:
             matrix_transition[indx, node + offset] = 1
 
-    while not identical_matrices(prev, matrix_transition):
-        prev = matrix_transition.copy()
+    count_non_zeros = -1
+    while visibles.count_nonzero() != count_non_zeros:
+        count_non_zeros = visibles.count_nonzero()
         next_matrices = {}
 
         for l in labels:
             next_matrices[l] = matrix_transition @ matrices[l]
-        matrix_transition = sp.lil_matrix(prev.shape, dtype=int)
+        matrix_transition = sp.lil_matrix(matrix_transition.shape, dtype=bool)
 
         for l in labels:
             n, m = next_matrices[l].shape
@@ -47,10 +48,7 @@ def get_reachable_vertices(
                         k = j
                 for j in range(m):
                     matrix_transition[k, j] |= bool(next_matrices[l][i, j])
-
-
-def identical_matrices(matrix_fst: sp.lil_matrix, matrix_snd: sp.lil_matrix):
-    return np.sum(np.logical_xor(matrix_fst.toarray(), matrix_snd.toarray())) == 0
+        visibles += matrix_transition.toarray()
 
 
 def combine_matrix(
@@ -62,8 +60,8 @@ def combine_matrix(
     for l in labels:
         number_rows_fa, number_colmn_fa = matrix_fa[l].shape
         number_rows_gr, number_colmn_gr = matrix_gr[l].shape
-        add_to_fa = sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=int)
-        add_to_gr = sp.lil_matrix((number_rows_gr, number_colmn_fa), dtype=int)
+        add_to_fa = sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=bool)
+        add_to_gr = sp.lil_matrix((number_rows_gr, number_colmn_fa), dtype=bool)
         add_matrix_fa = sp.hstack([matrix_fa[l], add_to_fa])
         add_matrix_gr = sp.hstack([add_to_gr, matrix_gr[l]])
         matrices[l] = sp.vstack([add_matrix_fa, add_matrix_gr])
@@ -78,7 +76,7 @@ def init_matrix_transition(
     i_matrix = sp.lil_matrix(sp.eye(number_rows_fa))
     matrix = sp.lil_matrix(
         sp.hstack(
-            [i_matrix, sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=int)]
+            [i_matrix, sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=bool)]
         )
     )
     return matrix
@@ -117,7 +115,7 @@ def init_mapping_and_matrix(
     number_labels = len(labels)
 
     for label in symbols:
-        decomposition[label] = sp.lil_matrix((number_labels, number_labels), dtype=int)
+        decomposition[label] = sp.lil_matrix((number_labels, number_labels), dtype=bool)
     mp = Mapping(labels)
 
     return decomposition, mp
