@@ -16,7 +16,7 @@ def get_reachable_vertices(
     matrix_gr, mp_gr = get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
     labels = labels_fa.intersection(labels_gr)
     matrices = combine_matrix(matrix_fa, matrix_gr, labels)
-
+    matrices = init_matrix_transition(matrix_fa, matrix_gr, labels)
 
 
 def combine_matrix(
@@ -33,6 +33,22 @@ def combine_matrix(
         add_matrix_fa = sp.hstack([matrix_fa[l], add_to_fa])
         add_matrix_gr = sp.hstack([add_to_gr, matrix_gr[l]])
         matrices[l] = sp.vstack([add_matrix_fa, add_matrix_gr])
+    return matrices
+
+
+def init_matrix_transition(
+    matrix_fa: dict[str, sp.lil_matrix],
+    matrix_gr: dict[str, sp.lil_matrix],
+    labels: set,
+) -> dict[str, sp.lil_matrix]:
+    matrices = {}
+    for l in labels:
+        number_rows_fa, _ = matrix_fa[l].shape
+        _, number_colmn_gr = matrix_gr[l].shape
+        i_matrix = sp.lil_matrix(sp.eye(number_rows_fa))
+        matrices[l] = sp.hstack(
+            [i_matrix, sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=int)]
+        )
     return matrices
 
 
@@ -54,7 +70,7 @@ def get_boolean_decomposition_and_map_for_fa(
     symbols: set, automata: fa.DeterministicFiniteAutomaton
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
     decomposition, mapp = init_mapping_and_matrix(symbols, list(automata.states))
-    
+
     mp = mapp.get_map()
     for u, l, v in automata:
         decomposition[l.value][mp[u.value], mp[v.value]] = 1
