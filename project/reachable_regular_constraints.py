@@ -21,34 +21,41 @@ def get_reachable_vertices(
     l = list(labels)[0]
     matrices = combine_matrix(matrix_fa, matrix_gr, labels)
     matrix_transition = init_matrix_transition(matrix_fa[l], matrix_gr[l])
-    offset, _ = matrix_transition.shape
+    offset, length = matrix_transition.shape
     mp = mp_fa.get_map()
 
-    visibles = sp.lil_matrix(matrix_transition, dtype=bool)
     for start in automata.start_states:
         indx = mp[start]
         for node in start_nodes:
             matrix_transition[indx, node + offset] = 1
 
     count_non_zeros = -1
+    visibles = sp.lil_matrix(matrix_transition, dtype=bool)
+    start_matrix = sp.lil_matrix(matrix_transition, dtype=bool)
+
     while visibles.count_nonzero() != count_non_zeros:
         count_non_zeros = visibles.count_nonzero()
-        next_matrices = {}
+        next_matrix = sp.eye(offset, length, dtype=bool, format="lil")
 
-        for l in labels:
-            next_matrices[l] = matrix_transition @ matrices[l]
-        matrix_transition = sp.lil_matrix(matrix_transition.shape, dtype=bool)
+        for matrix in matrices.values():
+            new_matrix = matrix_transition @ matrix
+            for i in range(offset):
+                for j in range(offset):
+                    if new_matrix[i, j]:
+                        next_matrix[j, offset:] += new_matrix[i, offset:]
+        matrix_transition = next_matrix
+        visibles += next_matrix
 
-        for l in labels:
-            n, m = next_matrices[l].shape
-            for i in range(n):
-                k = i
-                for j in range(n):
-                    if next_matrices[l][i, j] == 1:
-                        k = j
-                for j in range(m):
-                    matrix_transition[k, j] |= bool(next_matrices[l][i, j])
-        visibles += matrix_transition.toarray()
+    matrix_result = np.logical_xor(visibles.toarray(), start_matrix.toarray())
+
+    mp_to_node = mp_gr.get_imap()
+    res = set()
+    for final in automata.final_states:
+        indx = mp[final]
+        for i in range(offset, length, 1):
+            if matrix_result[indx, i]:
+                res.add(mp_to_node[i - offset])
+    return res
 
 
 def combine_matrix(
@@ -123,8 +130,8 @@ def init_mapping_and_matrix(
 
 def init_graph():
     gr = nx.MultiDiGraph()
-    gr.add_edge(0, 3, label="b")
-    gr.add_edge(3, 0, label="b")
+    gr.add_edge(0, 6, label="b")
+    gr.add_edge(6, 0, label="b")
     gr.add_edge(0, 1, label="a")
     gr.add_edge(1, 2, label="b")
     gr.add_edge(2, 0, label="a")
@@ -143,12 +150,5 @@ def init_regex():
 
 gr = init_graph()
 rx = init_regex()
-# print(gr.nodes())
-# print(list(rx.states))
-# mx = get_boolean_decomposition_and_map_for_fa(rx.symbols, rx)
-# print(mx[0]["a"].toarray())
-# mx = get_boolean_decomposition_and_map_for_graph(parse_labels(gr), gr)
-# print(mx[0]["a"].toarray())
-# print(mx[0]['b'].toarray())
 
-get_reachable_vertices(gr, rx, [0])
+print(get_reachable_vertices(gr, rx, [0,  1]))
