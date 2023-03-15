@@ -1,4 +1,5 @@
 import scipy.sparse as sp
+import numpy as np
 import pyformlang.finite_automaton as fa
 import networkx as nx
 from pyformlang.regular_expression import Regex
@@ -7,7 +8,9 @@ from intersection_finite_automata import Mapping
 
 
 def get_reachable_vertices(
-    graph: nx.MultiDiGraph, automata: fa.DeterministicFiniteAutomaton
+    graph: nx.MultiDiGraph,
+    automata: fa.DeterministicFiniteAutomaton,
+    start_nodes: list[int],
 ):
     labels_gr = parse_labels(graph)
     labels_fa = automata.symbols
@@ -15,8 +18,39 @@ def get_reachable_vertices(
     matrix_fa, mp_fa = get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
     matrix_gr, mp_gr = get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
     labels = labels_fa.intersection(labels_gr)
+    l = list(labels)[0]
     matrices = combine_matrix(matrix_fa, matrix_gr, labels)
-    matrices = init_matrix_transition(matrix_fa, matrix_gr, labels)
+    matrix_transition = init_matrix_transition(matrix_fa[l], matrix_gr[l])
+    offset, _ = matrix_transition.shape
+    mp = mp_fa.get_map()
+
+    prev = matrix_transition.copy()
+    for start in automata.start_states:
+        indx = mp[start]
+        for node in start_nodes:
+            matrix_transition[indx, node + offset] = 1
+
+    while not identical_matrices(prev, matrix_transition):
+        prev = matrix_transition.copy()
+        next_matrices = {}
+
+        for l in labels:
+            next_matrices[l] = matrix_transition @ matrices[l]
+        matrix_transition = sp.lil_matrix(prev.shape, dtype=int)
+
+        for l in labels:
+            n, m = next_matrices[l].shape
+            for i in range(n):
+                k = i
+                for j in range(n):
+                    if next_matrices[l][i, j] == 1:
+                        k = j
+                for j in range(m):
+                    matrix_transition[k, j] |= bool(next_matrices[l][i, j])
+
+
+def identical_matrices(matrix_fst: sp.lil_matrix, matrix_snd: sp.lil_matrix):
+    return np.sum(np.logical_xor(matrix_fst.toarray(), matrix_snd.toarray())) == 0
 
 
 def combine_matrix(
@@ -37,19 +71,17 @@ def combine_matrix(
 
 
 def init_matrix_transition(
-    matrix_fa: dict[str, sp.lil_matrix],
-    matrix_gr: dict[str, sp.lil_matrix],
-    labels: set,
+    matrix_fa: sp.lil_matrix, matrix_gr: sp.lil_matrix
 ) -> dict[str, sp.lil_matrix]:
-    matrices = {}
-    for l in labels:
-        number_rows_fa, _ = matrix_fa[l].shape
-        _, number_colmn_gr = matrix_gr[l].shape
-        i_matrix = sp.lil_matrix(sp.eye(number_rows_fa))
-        matrices[l] = sp.hstack(
+    number_rows_fa, _ = matrix_fa.shape
+    _, number_colmn_gr = matrix_gr.shape
+    i_matrix = sp.lil_matrix(sp.eye(number_rows_fa))
+    matrix = sp.lil_matrix(
+        sp.hstack(
             [i_matrix, sp.lil_matrix((number_rows_fa, number_colmn_gr), dtype=int)]
         )
-    return matrices
+    )
+    return matrix
 
 
 def get_boolean_decomposition_and_map_for_graph(
@@ -121,4 +153,4 @@ rx = init_regex()
 # print(mx[0]["a"].toarray())
 # print(mx[0]['b'].toarray())
 
-get_reachable_vertices(gr, rx)
+get_reachable_vertices(gr, rx, [0])
