@@ -12,6 +12,20 @@ def get_reachable_vertices(
     automata: fa.DeterministicFiniteAutomaton,
     start_nodes: list,
 ):
+    """
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        A graph in which achievable is sought
+    automata : fa.DeterministicFiniteAutomaton
+        Regular constraint in the form of a deterministic finite automaton
+    start_nodes: list
+        List of starting vertices
+
+    Returns
+    ----------
+        Returns pairs of vertices: start - finish
+    """
     number_start_nodes = len(start_nodes)
     if number_start_nodes > len(graph.nodes):
         raise ValueError("Fail number of starting vertices")
@@ -191,6 +205,22 @@ def _do_query(
 def regular_query_to_graph_each(
     graph: nx.MultiDiGraph, regex_expr: str, start_nodes: list, final_nodes: list = None
 ) -> set:
+    """
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        A graph in which achievable is sought
+    regex_expr : str
+        Regular expression written as a string
+    start_nodes : list
+        List of starting vertices
+    final_nodes : list
+        List of final vertices
+
+    Returns
+    ----------
+        Returns pairs of vertices: start - finish
+    """
     func = lambda x, y: (x, y)
     return _do_query(func, graph, regex_expr, start_nodes, final_nodes)
 
@@ -198,5 +228,21 @@ def regular_query_to_graph_each(
 def regular_query_to_graph_all(
     graph: nx.MultiDiGraph, regex_expr: str, start_nodes: list, final_nodes: list = None
 ) -> set:
+    """
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        A graph in which achievable is sought
+    regex_expr : str
+        Regular expression written as a string
+    start_nodes : list
+        List of starting vertices
+    final_nodes : list
+        List of final vertices
+
+    Returns
+    ----------
+        Returns the set of reachable vertices
+    """
     func = lambda _, y: y
     return _do_query(func, graph, regex_expr, start_nodes, final_nodes)
