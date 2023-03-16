@@ -18,12 +18,12 @@ def get_reachable_vertices(
         raise ValueError("Fail number of starting vertices")
     labels_gr = parse_labels(graph)
     labels_fa = automata.symbols
-    matrix_fa, mp_fa = get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
-    matrix_gr, mp_gr = get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
+    matrix_fa, mp_fa = _get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
+    matrix_gr, mp_gr = _get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
     labels = labels_fa.intersection(labels_gr)
     l = list(labels)[0]
-    matrices = combine_matrix(matrix_fa, matrix_gr, labels)
-    matrix_transition, offset, length = init_start_matrix(
+    matrices = _combine_matrix(matrix_fa, matrix_gr, labels)
+    matrix_transition, offset, length = _init_start_matrix(
         matrix_fa[l].shape[0],
         matrix_gr[l].shape[1],
         start_nodes,
@@ -31,7 +31,7 @@ def get_reachable_vertices(
         mp_fa,
         mp_gr,
     )
-    matrix_result = do_bfs(
+    matrix_result = _do_bfs(
         matrix_transition,
         matrices,
         matrix_fa[l].shape[0],
@@ -50,7 +50,7 @@ def get_reachable_vertices(
     return res_u_v
 
 
-def do_bfs(
+def _do_bfs(
     matrix_transition: sp.lil_matrix,
     matrices: sp.lil_matrix,
     offset: int,
@@ -62,7 +62,7 @@ def do_bfs(
     start_matrix = matrix_transition.copy()
     while visibles.count_nonzero() != count_non_zeros:
         count_non_zeros = visibles.count_nonzero()
-        t_matrix = init_matrix_transition(offset, length, number_starts)
+        t_matrix = _init_matrix_transition(offset, length, number_starts)
         for matrix in matrices.values():
             n_matrix = matrix_transition @ matrix
             for k in range(number_starts):
@@ -77,7 +77,7 @@ def do_bfs(
     return np.logical_xor(visibles.toarray(), start_matrix.toarray())
 
 
-def combine_matrix(
+def _combine_matrix(
     matrix_fa: dict[str, sp.lil_matrix],
     matrix_gr: dict[str, sp.lil_matrix],
     labels: set,
@@ -94,7 +94,7 @@ def combine_matrix(
     return matrices
 
 
-def init_start_matrix(
+def _init_start_matrix(
     number_rows_fa: int,
     number_colmn_gr: int,
     start_nodes: list,
@@ -102,7 +102,7 @@ def init_start_matrix(
     mp_fa: Mapping,
     mp_gr: Mapping,
 ) -> tuple[sp.lil_matrix, int, int]:
-    matrix_transition = init_matrix_transition(
+    matrix_transition = _init_matrix_transition(
         number_rows_fa, number_colmn_gr, len(start_nodes)
     )
     offset, length = matrix_transition.shape
@@ -118,7 +118,7 @@ def init_start_matrix(
     return matrix_transition, offset, length
 
 
-def init_matrix_transition(
+def _init_matrix_transition(
     number_rows_fa: int, number_colmn_gr: int, n: int
 ) -> sp.lil_matrix:
     template = sp.lil_matrix(
@@ -132,10 +132,10 @@ def init_matrix_transition(
     return matrix
 
 
-def get_boolean_decomposition_and_map_for_graph(
+def _get_boolean_decomposition_and_map_for_graph(
     symbols: set, graph: nx.MultiDiGraph
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
-    decomposition, mapp = init_mapping_and_matrix(symbols, sorted(graph.nodes))
+    decomposition, mapp = _init_mapping_and_matrix(symbols, sorted(graph.nodes))
 
     mp = mapp.get_map()
     for u, v, ddict in graph.edges(data=True):
@@ -146,10 +146,10 @@ def get_boolean_decomposition_and_map_for_graph(
     return decomposition, mapp
 
 
-def get_boolean_decomposition_and_map_for_fa(
+def _get_boolean_decomposition_and_map_for_fa(
     symbols: set, automata: fa.DeterministicFiniteAutomaton
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
-    decomposition, mapp = init_mapping_and_matrix(symbols, list(automata.states))
+    decomposition, mapp = _init_mapping_and_matrix(symbols, list(automata.states))
 
     mp = mapp.get_map()
     for u, l, v in automata:
@@ -158,7 +158,7 @@ def get_boolean_decomposition_and_map_for_fa(
     return decomposition, mapp
 
 
-def init_mapping_and_matrix(
+def _init_mapping_and_matrix(
     symbols: list, labels: list
 ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
     decomposition = {}
