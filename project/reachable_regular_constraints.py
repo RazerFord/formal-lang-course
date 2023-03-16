@@ -2,10 +2,9 @@ import scipy.sparse as sp
 import numpy as np
 import pyformlang.finite_automaton as fa
 import networkx as nx
-from pyformlang.regular_expression import Regex
-from graph_info import parse_labels
-from intersection_finite_automata import Mapping
-from finite_automata import create_deterministic_automaton_from_regex
+from project.graph_info import parse_labels
+from project.intersection_finite_automata import Mapping
+from project.finite_automata import create_deterministic_automaton_from_regex
 
 
 def get_reachable_vertices(
@@ -201,32 +200,3 @@ def regular_query_to_graph_all(
 ) -> set:
     func = lambda _, y: y
     return _do_query(func, graph, regex_expr, start_nodes, final_nodes)
-
-
-def init_graph():
-    gr = nx.MultiDiGraph()
-    gr.add_edge(0, 3, label="b")
-    gr.add_edge(3, 0, label="b")
-    gr.add_edge(0, 1, label="a")
-    gr.add_edge(1, 2, label="b")
-    gr.add_edge(3, 2, label="b")
-    gr.add_edge(2, 0, label="a")
-    return gr
-
-
-def init_regex():
-    gr = fa.DeterministicFiniteAutomaton()
-    gr.add_start_state(0)
-    gr.add_final_state(2)
-    gr.add_transition(0, "b", 0)
-    gr.add_transition(0, "a", 1)
-    gr.add_transition(1, "b", 2)
-    return gr
-
-
-gr = init_graph()
-rx = init_regex()
-rx = Regex("b* a b").to_epsilon_nfa().minimize()
-print(regular_query_to_graph_each(gr, "b* a b", [3, 2, 1]))
-print(regular_query_to_graph_all(gr, "b* a b", [3, 2, 1]))
-print(get_reachable_vertices(gr, rx, [3, 2, 1]))
