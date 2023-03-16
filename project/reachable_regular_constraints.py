@@ -5,6 +5,7 @@ import networkx as nx
 from pyformlang.regular_expression import Regex
 from graph_info import parse_labels
 from intersection_finite_automata import Mapping
+from finite_automata import create_deterministic_automaton_from_regex
 
 
 def get_reachable_vertices(
@@ -47,7 +48,6 @@ def get_reachable_vertices(
         next_matrix = init_matrix_transition(
             matrix_fa[l].shape[0], matrix_gr[l].shape[1], len(start_nodes)
         )
-
         for matrix in matrices.values():
             new_matrix = matrix_transition @ matrix
             for k in range(len(start_nodes)):
@@ -64,16 +64,13 @@ def get_reachable_vertices(
 
     mp_to_node = mp_gr.get_imap()
     res_u_v = set()
-    res = set()
     for k, v in enumerate(start_nodes):
         for final in automata.final_states:
-            print(automata.final_states)
             indx = mp_fa_to_indx[final]
             for i in range(offset, length, 1):
                 if matrix_result[indx + k * offset, i]:
                     res_u_v.add((v, mp_to_node[i - offset]))
-                    res.add(mp_to_node[i - offset])
-    return res_u_v, res
+    return res_u_v
 
 
 def combine_matrix(
@@ -146,6 +143,38 @@ def init_mapping_and_matrix(
     return decomposition, mp
 
 
+def _do_query(
+    func,
+    graph: nx.MultiDiGraph,
+    regex_expr: str,
+    start_nodes: list,
+    final_nodes: list = None,
+):
+    if final_nodes is None:
+        final_nodes = graph.nodes()
+    regex = create_deterministic_automaton_from_regex(regex_expr)
+    res_u_v = get_reachable_vertices(graph, regex, start_nodes)
+    new_res_u_v = set()
+    for u, v in res_u_v:
+        if v in final_nodes:
+            new_res_u_v.add(func(u, v))
+    return new_res_u_v
+
+
+def regular_query_to_graph_each(
+    graph: nx.MultiDiGraph, regex_expr: str, start_nodes: list, final_nodes: list = None
+) -> set:
+    func = lambda x, y: (x, y)
+    return _do_query(func, graph, regex_expr, start_nodes, final_nodes)
+
+
+def regular_query_to_graph_all(
+    graph: nx.MultiDiGraph, regex_expr: str, start_nodes: list, final_nodes: list = None
+) -> set:
+    func = lambda _, y: y
+    return _do_query(func, graph, regex_expr, start_nodes, final_nodes)
+
+
 def init_graph():
     gr = nx.MultiDiGraph()
     gr.add_edge(0, 3, label="b")
@@ -169,5 +198,7 @@ def init_regex():
 
 gr = init_graph()
 rx = init_regex()
-
-print(get_reachable_vertices(gr, rx, [1]))
+rx = Regex("b* a b").to_epsilon_nfa().minimize()
+print(regular_query_to_graph_each(gr, "b* a b", [3, 2, 1]))
+print(regular_query_to_graph_all(gr, "b* a b", [3, 2, 1]))
+print(get_reachable_vertices(gr, rx, [3, 2, 1]))
