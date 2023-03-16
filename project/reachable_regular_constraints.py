@@ -11,57 +11,34 @@ from finite_automata import create_deterministic_automaton_from_regex
 def get_reachable_vertices(
     graph: nx.MultiDiGraph,
     automata: fa.DeterministicFiniteAutomaton,
-    start_nodes: list[int],
+    start_nodes: list,
 ):
-    if len(start_nodes) > len(graph.nodes):
-        raise ValueError(
-            "The number of starting vertices is greater than the vertices in the graph"
-        )
+    number_start_nodes = len(start_nodes)
+    if number_start_nodes > len(graph.nodes):
+        raise ValueError("Fail number of starting vertices")
     labels_gr = parse_labels(graph)
     labels_fa = automata.symbols
-
     matrix_fa, mp_fa = get_boolean_decomposition_and_map_for_fa(labels_fa, automata)
     matrix_gr, mp_gr = get_boolean_decomposition_and_map_for_graph(labels_gr, graph)
     labels = labels_fa.intersection(labels_gr)
     l = list(labels)[0]
     matrices = combine_matrix(matrix_fa, matrix_gr, labels)
-    matrix_transition = init_matrix_transition(
-        matrix_fa[l].shape[0], matrix_gr[l].shape[1], len(start_nodes)
+    matrix_transition, offset, length = init_start_matrix(
+        matrix_fa[l].shape[0],
+        matrix_gr[l].shape[1],
+        start_nodes,
+        automata.start_states,
+        mp_fa,
+        mp_gr,
     )
-    height, length = matrix_transition.shape
-    offset = height // len(start_nodes)
+    matrix_result = do_bfs(
+        matrix_transition,
+        matrices,
+        matrix_fa[l].shape[0],
+        matrix_gr[l].shape[1],
+        number_start_nodes,
+    )
     mp_fa_to_indx = mp_fa.get_map()
-    mp_gr_to_indx = mp_gr.get_map()
-
-    for start in automata.start_states:
-        indx = mp_fa_to_indx[start]
-        for i, node in enumerate(start_nodes):
-            indx_node = mp_gr_to_indx[node]
-            matrix_transition[indx + i * offset, indx_node + offset] = 1
-
-    count_non_zeros = -1
-    visibles = matrix_transition.copy()
-    start_matrix = matrix_transition.copy()
-
-    while visibles.count_nonzero() != count_non_zeros:
-        count_non_zeros = visibles.count_nonzero()
-        next_matrix = init_matrix_transition(
-            matrix_fa[l].shape[0], matrix_gr[l].shape[1], len(start_nodes)
-        )
-        for matrix in matrices.values():
-            new_matrix = matrix_transition @ matrix
-            for k in range(len(start_nodes)):
-                for i in range(offset):
-                    for j in range(offset):
-                        if new_matrix[i + offset * k, j]:
-                            next_matrix[j + offset * k, offset:] += new_matrix[
-                                i + offset * k, offset:
-                            ]
-        matrix_transition = next_matrix
-        visibles += next_matrix
-
-    matrix_result = np.logical_xor(visibles.toarray(), start_matrix.toarray())
-
     mp_to_node = mp_gr.get_imap()
     res_u_v = set()
     for k, v in enumerate(start_nodes):
@@ -71,6 +48,33 @@ def get_reachable_vertices(
                 if matrix_result[indx + k * offset, i]:
                     res_u_v.add((v, mp_to_node[i - offset]))
     return res_u_v
+
+
+def do_bfs(
+    matrix_transition: sp.lil_matrix,
+    matrices: sp.lil_matrix,
+    offset: int,
+    length: int,
+    number_starts: int,
+) -> np.array:
+    count_non_zeros = -1
+    visibles = matrix_transition.copy()
+    start_matrix = matrix_transition.copy()
+    while visibles.count_nonzero() != count_non_zeros:
+        count_non_zeros = visibles.count_nonzero()
+        t_matrix = init_matrix_transition(offset, length, number_starts)
+        for matrix in matrices.values():
+            n_matrix = matrix_transition @ matrix
+            for k in range(number_starts):
+                for i in range(offset):
+                    for j in range(offset):
+                        if n_matrix[i + offset * k, j]:
+                            t_matrix[j + offset * k, offset:] += n_matrix[
+                                i + offset * k, offset:
+                            ]
+        matrix_transition = t_matrix
+        visibles += t_matrix
+    return np.logical_xor(visibles.toarray(), start_matrix.toarray())
 
 
 def combine_matrix(
@@ -90,9 +94,33 @@ def combine_matrix(
     return matrices
 
 
+def init_start_matrix(
+    number_rows_fa: int,
+    number_colmn_gr: int,
+    start_nodes: list,
+    start_states: list,
+    mp_fa: Mapping,
+    mp_gr: Mapping,
+) -> tuple[sp.lil_matrix, int, int]:
+    matrix_transition = init_matrix_transition(
+        number_rows_fa, number_colmn_gr, len(start_nodes)
+    )
+    offset, length = matrix_transition.shape
+    offset = offset // len(start_nodes)
+    mp_fa_to_indx = mp_fa.get_map()
+    mp_gr_to_indx = mp_gr.get_map()
+
+    for start in start_states:
+        indx = mp_fa_to_indx[start]
+        for i, node in enumerate(start_nodes):
+            indx_node = mp_gr_to_indx[node]
+            matrix_transition[indx + i * offset, indx_node + offset] = 1
+    return matrix_transition, offset, length
+
+
 def init_matrix_transition(
     number_rows_fa: int, number_colmn_gr: int, n: int
-) -> dict[str, sp.lil_matrix]:
+) -> sp.lil_matrix:
     template = sp.lil_matrix(
         sp.eye(
             number_rows_fa, number_rows_fa + number_colmn_gr, dtype=bool, format="lil"
