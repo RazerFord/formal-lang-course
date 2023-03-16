@@ -78,16 +78,24 @@ def _do_bfs(
         t_matrix = _init_matrix_transition(offset, length, number_starts)
         for matrix in matrices.values():
             n_matrix = matrix_transition @ matrix
-            for k in range(number_starts):
-                for i in range(offset):
-                    for j in range(offset):
-                        if n_matrix[i + offset * k, j]:
-                            t_matrix[j + offset * k, offset:] += n_matrix[
-                                i + offset * k, offset:
-                            ]
+            t_matrix = _transform_rows(n_matrix, t_matrix, offset, number_starts)
+
         matrix_transition = t_matrix
         visibles += t_matrix
     return np.logical_xor(visibles.toarray(), start_matrix.toarray())
+
+
+def _transform_rows(
+    n_matrix: sp.lil_matrix, t_matrix: sp.lil_matrix, offset: int, number_starts: int
+):
+    for k in range(number_starts):
+        for i in range(offset):
+            for j in range(offset):
+                if n_matrix[i + offset * k, j]:
+                    t_matrix[j + offset * k, offset:] += n_matrix[
+                        i + offset * k, offset:
+                    ]
+    return t_matrix
 
 
 def _combine_matrix(
