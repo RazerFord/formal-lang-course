@@ -21,6 +21,11 @@ class TestCfgToWcnf:
         wcnf = cfg_to_wcnf(test_cfg)
         assert equals(answer_wcnf, wcnf)
 
+    def test_third(self):
+        test_cfg, answer_wcnf = self.init_third_test()
+        wcnf = cfg_to_wcnf(test_cfg)
+        assert equals(answer_wcnf, wcnf)
+
     def init_first_test(self) -> tuple[cfg.CFG, cfg.CFG]:
         S = cfg.Variable("S")
         A = cfg.Variable("A")
@@ -67,4 +72,35 @@ class TestCfgToWcnf:
         answer_prods = []
         answer_prods.append(cfg.Production(S, [a]))
         answer_wcnf = cfg.CFG({S}, {a}, S, set(answer_prods))
+        return test_cfg, answer_wcnf
+
+    def init_third_test(self) -> cfg.CFG:
+        S = cfg.Variable("S")
+        B = cfg.Variable("B")
+        C = cfg.Variable("C")
+        D = cfg.Variable("D")
+        a = cfg.Terminal("a")
+        b = cfg.Terminal("b")
+        c = cfg.Terminal("c")
+        prod0 = cfg.Production(S, [B])
+        prod1 = cfg.Production(S, [a])
+        prod2 = cfg.Production(B, [C])
+        prod3 = cfg.Production(B, [b])
+        prod4 = cfg.Production(C, [D, D])
+        prod5 = cfg.Production(C, [c])
+        prod6 = cfg.Production(D, [cfg.Epsilon()])
+        test_cfg = cfg.CFG(
+            {S, B, C, D},
+            {a, b, c},
+            S,
+            {prod0, prod1, prod2, prod3, prod4, prod5, prod6},
+        )
+
+        answer_prods = []
+        answer_prods.append(cfg.Production(S, [a]))
+        answer_prods.append(cfg.Production(S, [b]))
+        answer_prods.append(cfg.Production(S, [c]))
+        answer_prods.append(cfg.Production(S, [D, D]))
+        answer_prods.append(cfg.Production(D, [cfg.Epsilon()]))
+        answer_wcnf = cfg.CFG({S}, {a, b, c, D}, S, set(answer_prods))
         return test_cfg, answer_wcnf
