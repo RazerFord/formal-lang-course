@@ -19,7 +19,7 @@ class Mapping:
     """
 
     def __init__(self, states: list[State]):
-        self.states = list(states)
+        self.states = states
         self._mapp, self._invert_mapp = self._init_mapping()
 
     def _init_mapping(self):
@@ -114,7 +114,7 @@ class IntersectionFiniteAutomata:
                 (number_states, number_states), dtype=int
             )
 
-        mapp = Mapping(automata.states)
+        mapp = Mapping(list(automata.states))
         mp = mapp.get_map()
 
         for u, l, v in automata:
