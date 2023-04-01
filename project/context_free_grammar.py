@@ -15,11 +15,7 @@ def cfg_to_wcnf(cfg_gr: cfg.CFG) -> cfg.CFG:
     cfg.CFG
         A context-free grammar in weak Chomsky normal form
     """
-    cfg_clear = (
-        cfg_gr.remove_useless_symbols()
-        .eliminate_unit_productions()
-        .remove_useless_symbols()
-    )
+    cfg_clear = cfg_gr.eliminate_unit_productions().remove_useless_symbols()
 
     prods = cfg_clear._get_productions_with_only_single_terminals()
     prods = cfg_clear._decompose_productions(prods)
