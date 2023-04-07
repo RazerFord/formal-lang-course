@@ -1,8 +1,9 @@
 from pyformlang.cfg import Production, Variable, Terminal, CFG, Epsilon
-from pyformlang.rsa import Box, RecursiveAutomaton
 from pyformlang.cfg.utils import to_variable, to_terminal
 from pyformlang.regular_expression import Regex
+from pyformlang.finite_automaton.finite_automaton import to_symbol
 from context_free_grammar import read_cfg_from_file
+from rsm import RSM
 from functools import reduce
 from typing import AbstractSet, Iterable
 
@@ -44,8 +45,12 @@ class ECFG:
         return self._variables
 
     def to_rsm(self):
-        boxes = [Box(p.to_epsilon_nfa(), n) for n, p in self._productions.items()]
-        return RecursiveAutomaton(self._variables, self._start_symbol, boxes)
+        boxes = {
+            to_symbol(n.value): p.to_epsilon_nfa().minimize()
+            for n, p in self._productions.items()
+        }
+        s = to_symbol(self._start_symbol.value)
+        return RSM(s, boxes)
 
     @staticmethod
     def from_cfg(cfg: CFG):
