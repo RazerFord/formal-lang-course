@@ -100,3 +100,4 @@ cfg = CFG(
 )
 f = ECFG.from_cfg(cfg)
 rsm = f.to_rsm()
+o = rsm.matrices
