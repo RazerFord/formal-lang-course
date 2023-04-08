@@ -1,7 +1,10 @@
 from pyformlang.finite_automaton.finite_automaton import to_symbol, Symbol
 from pyformlang.finite_automaton import EpsilonNFA
 import scipy.sparse as sp
-from intersection_finite_automata import get_boolean_decomposition_and_map, Mapping
+from project.intersection_finite_automata import (
+    get_boolean_decomposition_and_map,
+    Mapping,
+)
 
 
 class RSM:

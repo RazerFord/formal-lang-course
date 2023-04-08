@@ -2,8 +2,8 @@ from pyformlang.cfg import Production, Variable, Terminal, CFG, Epsilon
 from pyformlang.cfg.utils import to_variable, to_terminal
 from pyformlang.regular_expression import Regex
 from pyformlang.finite_automaton.finite_automaton import to_symbol
-from context_free_grammar import read_cfg_from_file
-from rsm import RSM
+from project.context_free_grammar import read_cfg_from_file
+from project.rsm import RSM
 from functools import reduce
 from typing import AbstractSet, Iterable
 
@@ -78,26 +78,3 @@ class ECFG:
     @staticmethod
     def from_str(text: str, start_sym: Variable = Variable("S")):
         return ECFG.from_cfg(CFG.from_text(text, start_sym))
-
-
-S = Variable("S")
-A = Variable("A")
-B = Variable("B")
-a = Terminal("a")
-b = Terminal("b")
-prods = []
-prods.append(Production(S, [A, S, A]))
-prods.append(Production(S, [a, B]))
-prods.append(Production(A, [B]))
-prods.append(Production(A, [S]))
-prods.append(Production(B, [b]))
-prods.append(Production(B, [Epsilon()]))
-cfg = CFG(
-    {S, A, B},
-    {a, b},
-    S,
-    set(prods),
-)
-f = ECFG.from_cfg(cfg)
-rsm = f.to_rsm()
-o = rsm.matrices
