@@ -9,6 +9,21 @@ from typing import AbstractSet, Iterable
 
 
 class ECFG:
+    """
+    Class of extended context-free grammars
+
+    Parameters
+    ----------
+    variables : AbstractSet[Variable]
+        Set of variables in ECFG
+    terminals : AbstractSet
+        Set of terminals in ECFG
+    start_symbol : Variable
+        Start symbol of ECFG
+    productions : Iterable[Production]
+        Productions of ECFG
+    """
+
     def __init__(
         self,
         variables: AbstractSet[Variable] = None,
@@ -29,22 +44,67 @@ class ECFG:
         self._productions = productions
 
     @property
-    def productions(self):
+    def productions(self) -> Iterable[Production]:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        Iterable[Production]
+            Returns productions
+        """
         return self._productions
 
     @property
-    def start_symbol(self):
+    def start_symbol(self) -> Variable:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        Variable
+            Returns start symbol
+        """
         return self._start_symbol
 
     @property
-    def terminals(self):
+    def terminals(self) -> AbstractSet[Terminal]:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        AbstractSet[Terminal]
+            Returns set of terminals
+        """
         return self._terminals
 
     @property
-    def variables(self):
+    def variables(self) -> AbstractSet[Variable]:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        AbstractSet[Terminal]
+            Returns set of variables
+        """
         return self._variables
 
-    def to_rsm(self):
+    def to_rsm(self) -> RSM:
+        """
+        Parameters
+        ----------
+
+        Returns
+        ----------
+        RSM
+            Returns RSM, which is derived from ECFG
+        """
         boxes = {
             to_symbol(n.value): p.to_epsilon_nfa() for n, p in self._productions.items()
         }
@@ -52,7 +112,18 @@ class ECFG:
         return RSM(s, boxes)
 
     @staticmethod
-    def from_cfg(cfg: CFG):
+    def from_cfg(cfg: CFG) -> "ECFG":
+        """
+        Parameters
+        ----------
+        cfg : CFG
+            CFG from which ECFG is produced
+
+        Returns
+        ----------
+        RSM
+            Returns ECFG from CFG
+        """
         variables = cfg.variables
         terminals = cfg.terminals
         start_symbol = cfg.start_symbol
@@ -72,9 +143,33 @@ class ECFG:
         return ECFG(variables, terminals, start_symbol, prods)
 
     @staticmethod
-    def from_file(name_file: str, start_sym: Variable = Variable("S")):
+    def from_file(name_file: str, start_sym: Variable = Variable("S")) -> "ECFG":
+        """
+        Parameters
+        ----------
+        name_file : str
+            The name of the file from which the CFG is read
+        start_sym :
+            Start symbol
+        Returns
+        ----------
+        RSM
+            Returns ECFG from file
+        """
         return ECFG.from_cfg(read_cfg_from_file(name_file, start_sym))
 
     @staticmethod
-    def from_str(text: str, start_sym: Variable = Variable("S")):
+    def from_str(text: str, start_sym: Variable = Variable("S")) -> "ECFG":
+        """
+        Parameters
+        ----------
+        text : str
+            The strign from which the CFG is read
+        start_sym :
+            Start symbol
+        Returns
+        ----------
+        RSM
+            Returns ECFG from string
+        """
         return ECFG.from_cfg(CFG.from_text(text, start_sym))
