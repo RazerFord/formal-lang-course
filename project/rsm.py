@@ -29,7 +29,7 @@ class RSM:
     def matrices(self) -> dict[tuple[dict[str, sp.lil_matrix], Mapping]]:
         matrices = {}
         for ch, val in self.boxes.items():
-            labels = [l.value for _, l, _ in val]
+            labels = {l.value for _, l, _ in val}
             matrices[ch] = get_boolean_decomposition_and_map(labels, val)
         return matrices
 
