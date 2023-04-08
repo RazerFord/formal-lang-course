@@ -46,8 +46,7 @@ class ECFG:
 
     def to_rsm(self):
         boxes = {
-            to_symbol(n.value): p.to_epsilon_nfa().minimize()
-            for n, p in self._productions.items()
+            to_symbol(n.value): p.to_epsilon_nfa() for n, p in self._productions.items()
         }
         s = to_symbol(self._start_symbol.value)
         return RSM(s, boxes)
