@@ -75,11 +75,11 @@ class IntersectionFiniteAutomata:
         self.enfa = EpsilonNFA()
         self._init_states(fst_automata, snd_automata)
         self.symbols = set(list(fst_automata.symbols) + list(snd_automata.symbols))
-        self._fst_decompos, self._fst_mp = self._get_boolean_decomposition_and_map(
-            fst_automata
+        self._fst_decompos, self._fst_mp = get_boolean_decomposition_and_map(
+            self.symbols, fst_automata
         )
-        self._snd_decompos, self._snd_mp = self._get_boolean_decomposition_and_map(
-            snd_automata
+        self._snd_decompos, self._snd_mp = get_boolean_decomposition_and_map(
+            self.symbols, snd_automata
         )
         self._mtrxes = self._calculate_kron()
         self._add_transitions(len(snd_automata.states))
@@ -102,25 +102,6 @@ class IntersectionFiniteAutomata:
         for final_state in final_states:
             for state in final_state:
                 self.enfa.add_final_state(state)
-
-    def _get_boolean_decomposition_and_map(
-        self, automata: DeterministicFiniteAutomaton
-    ) -> tuple[dict[str, sp.lil_matrix], Mapping]:
-        decomposition = {}
-        number_states = len(automata.states)
-
-        for label in self.symbols:
-            decomposition[label] = sp.lil_matrix(
-                (number_states, number_states), dtype=int
-            )
-
-        mapp = Mapping(list(automata.states))
-        mp = mapp.get_map()
-
-        for u, l, v in automata:
-            decomposition[l.value][mp[u.value], mp[v.value]] = 1
-
-        return decomposition, mapp
 
     def _calculate_kron(self):
         mtrxes = {}
@@ -194,6 +175,37 @@ class IntersectionFiniteAutomata:
             Return NFA
         """
         return self.enfa
+
+
+def get_boolean_decomposition_and_map(
+    symbols: set, automata: DeterministicFiniteAutomaton
+) -> tuple[dict[str, sp.lil_matrix], Mapping]:
+    """
+    Parameters
+    ----------
+    symbols : set
+        Symbols of the automata
+    automata : DeterministicFiniteAutomaton
+        Automata
+
+    Returns
+    ----------
+    tuple[dict[str, sp.lil_matrix], Mapping]
+        Returns boolean decomposition, map
+    """
+    decomposition = {}
+    number_states = len(automata.states)
+
+    for label in symbols:
+        decomposition[label] = sp.lil_matrix((number_states, number_states), dtype=int)
+
+    mapp = Mapping(list(automata.states))
+    mp = mapp.get_map()
+
+    for u, l, v in automata:
+        decomposition[l.value][mp[u.value], mp[v.value]] = 1
+
+    return decomposition, mapp
 
 
 def get_intersection_two_finite_automata(
