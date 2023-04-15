@@ -1,9 +1,24 @@
 import networkx as nx
 from pyformlang import cfg
-from context_free_grammar import cfg_to_wcnf
+from project.context_free_grammar import cfg_to_wcnf
 
 
-def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG) -> set(tuple[int, cfg.Variable, int]):
+def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG) -> set[tuple[int, cfg.Variable, int]]:
+    """
+    Parameters
+    ----------
+        graph: nx.MultiGraph
+            The graph in which the reachability is checked
+        cfgr: cfg.CFG
+            Context-free grammar for graph query
+
+    Returns
+    ----------
+        set[tuple[int, cfg.Variable, int]]
+            Returns a set of tuples. The first element of the tuple
+            is the start symbol, the second element is the non-terminal
+            symbol, the third is the final node
+    """
     wcnf = cfg_to_wcnf(cfgr)
     graph = _init_new_graph(graph, wcnf)
     result = set()
@@ -53,10 +68,31 @@ def _init_new_graph(graph: nx.MultiGraph, wcnf: cfg.CFG) -> nx.MultiGraph:
 def query_reachability_graph_and_cfg(
     graph: nx.MultiGraph,
     cfgr: cfg.CFG,
-    variable=None,
+    variable: cfg.Variable = None,
     start_nodes: set = None,
     final_nodes: set = None,
-) -> set(tuple[int, int]):
+) -> set[tuple[int, int]]:
+    """
+    Parameters
+    ----------
+        graph: nx.MultiGraph
+            The graph in which the reachability is checked
+        cfgr: cfg.CFG
+            Context-free grammar for graph query
+        variable: cfg.Variable
+            Start variable in CFG
+        start_nodes: set
+            Starting vertices in a graph
+        final_nodes: set
+            Final vertices in a graph
+
+    Returns
+    ----------
+        set[tuple[int, int]]
+            Returns a set of tuples. The first element of the tuple
+            is the starting node, the second element of the tuple
+            is the final node
+    """
     result = hellings(graph, cfgr)
     if start_nodes is None:
         start_nodes = graph.nodes
@@ -69,31 +105,3 @@ def query_reachability_graph_and_cfg(
         if var == variable and u in start_nodes and v in final_nodes:
             answer.add((u, v))
     return answer
-
-
-S = cfg.Variable("S")
-S1 = cfg.Variable("S1")
-B = cfg.Variable("B")
-A = cfg.Variable("A")
-a = cfg.Terminal("a")
-b = cfg.Terminal("b")
-prods = []
-prods.append(cfg.Production(S, [A, B]))
-prods.append(cfg.Production(S, [A, S1]))
-prods.append(cfg.Production(S1, [S, B]))
-prods.append(cfg.Production(A, [a]))
-prods.append(cfg.Production(B, [b]))
-test_cfg = cfg.CFG(
-    variables={S, A, B, S1},
-    terminals={a, b},
-    start_symbol=S,
-    productions=set(prods),
-)
-
-graph = nx.MultiDiGraph()
-graph.add_edge(0, 1, label="a")
-graph.add_edge(1, 2, label="a")
-graph.add_edge(2, 0, label="a")
-graph.add_edge(2, 3, label="b")
-graph.add_edge(3, 2, label="b")
-hellings(graph, test_cfg)
