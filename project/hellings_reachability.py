@@ -3,7 +3,7 @@ from pyformlang import cfg
 from context_free_grammar import cfg_to_wcnf
 
 
-def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG):
+def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG) -> set(tuple[int, cfg.Variable, int]):
     wcnf = cfg_to_wcnf(cfgr)
     graph = _init_new_graph(graph, wcnf)
     result = set()
@@ -29,7 +29,7 @@ def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG):
                         queue.append(p)
                         add.add(p)
         result = result.union(add)
-    print(result)
+    return result
 
 
 def _init_new_graph(graph: nx.MultiGraph, wcnf: cfg.CFG) -> nx.MultiGraph:
@@ -48,6 +48,27 @@ def _init_new_graph(graph: nx.MultiGraph, wcnf: cfg.CFG) -> nx.MultiGraph:
         for var in variables:
             new_graph.add_edge(node, node, label=var)
     return new_graph
+
+
+def query_reachability_graph_and_cfg(
+    graph: nx.MultiGraph,
+    cfgr: cfg.CFG,
+    variable=None,
+    start_nodes: set = None,
+    final_nodes: set = None,
+) -> set(tuple[int, int]):
+    result = hellings(graph, cfgr)
+    if start_nodes is None:
+        start_nodes = graph.nodes
+    if final_nodes is None:
+        final_nodes = graph.nodes
+    if variable is None:
+        variable = cfgr.start_symbol
+    answer = set()
+    for u, var, v in result:
+        if var == variable and u in start_nodes and v in final_nodes:
+            answer.add((u, v))
+    return answer
 
 
 S = cfg.Variable("S")
