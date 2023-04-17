@@ -1,16 +1,22 @@
 import networkx as nx
+from pathlib import Path
 from pyformlang import cfg
 from project.context_free_grammar import cfg_to_wcnf
+from project.context_free_grammar import read_cfg_from_file
 
 
-def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG) -> set[tuple[int, cfg.Variable, int]]:
+def hellings(
+    graph: nx.MultiGraph | str, cfgr: cfg.CFG | str
+) -> set[tuple[int, cfg.Variable, int]]:
     """
     Parameters
     ----------
         graph: nx.MultiGraph
-            The graph in which the reachability is checked
+            The graph or path to the graph for which the reachability is
+            being checked
         cfgr: cfg.CFG
-            Context-free grammar for graph query
+            Context-free grammar or the path to the file in which it is
+            stored
 
     Returns
     ----------
@@ -19,6 +25,14 @@ def hellings(graph: nx.MultiGraph, cfgr: cfg.CFG) -> set[tuple[int, cfg.Variable
             is the start symbol, the second element is the non-terminal
             symbol, the third is the final node
     """
+    if isinstance(graph, str):
+        graph = (
+            nx.adjlist.read_adjlist(graph, create_using=nx.MultiDiGraph, nodetype=int),
+        )
+    if isinstance(cfgr, str) and Path(cfgr).is_file():
+        cfgr = read_cfg_from_file(cfgr)
+    if isinstance(cfgr, str) and not Path(cfgr).is_file():
+        cfgr = cfg.CFG.from_text(cfgr)
     wcnf = cfg_to_wcnf(cfgr)
     graph = _init_new_graph(graph, wcnf)
     result = set()
@@ -66,8 +80,8 @@ def _init_new_graph(graph: nx.MultiGraph, wcnf: cfg.CFG) -> nx.MultiGraph:
 
 
 def query_reachability_graph_and_cfg(
-    graph: nx.MultiGraph,
-    cfgr: cfg.CFG,
+    graph: nx.MultiGraph | str,
+    cfgr: cfg.CFG | str,
     variable: cfg.Variable = None,
     start_nodes: set = None,
     final_nodes: set = None,
