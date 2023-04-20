@@ -3,7 +3,7 @@ from project.cfpq import cfpq_hellings
 from pyformlang.cfg import Variable
 
 
-class TestQuery:
+class TestQueryHellings:
     def test_simple_unreachable(self):
         result = cfpq_hellings(data.graph_simple(), data.cfg_simple(), None, {2}, {1})
         assert len(result) == 0

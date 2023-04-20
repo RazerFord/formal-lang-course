@@ -3,12 +3,17 @@ from project.matrix import matrix
 
 
 class TestMatrix:
+    def test_simple(self):
+        cfg = data.cfg_simple()
+        graph = data.graph_simple()
+        assert matrix(graph, cfg) == data.answer_simple()
+
     def test_hard_first(self):
-        cfga = data.cfg_first_hard()
+        cfg = data.cfg_first_hard()
         graph = data.graph_hard()
-        assert data.answer_hard_first() == matrix(graph, cfga)
+        assert matrix(graph, cfg) == data.answer_hard_first()
 
     def test_hard_second(self):
-        cfga = data.cfg_second_hard()
+        cfg = data.cfg_second_hard()
         graph = data.graph_hard()
-        assert data.answer_hard_second() == matrix(graph, cfga)
+        assert matrix(graph, cfg) == data.answer_hard_second()
