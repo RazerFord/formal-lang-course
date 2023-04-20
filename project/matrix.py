@@ -20,7 +20,24 @@ def matrix(
         cfgr = cfg.CFG.from_text(cfgr)
 
     wcnf = cfg_to_wcnf(cfgr)
-    graph, mp = _init_matrix(graph, wcnf)
+    matrices, mp = _init_matrix(graph, wcnf)
+
+    active_productions = set([p for p in wcnf.productions if len(p.body) == 2])
+
+    changed = True
+    while changed:
+        changed = False
+        for p in active_productions:
+            nonzero = matrices[p.head].count_nonzero()
+            matrices[p.head] += matrices[p.body[0]] @ matrices[p.body[1]]
+            changed |= nonzero != matrices[p.head].count_nonzero()
+
+    imp = mp.get_imap()
+    ans = set()
+    for p in wcnf.productions:
+        for u, v in zip(*matrices[p.head].nonzero()):
+            ans.add((imp[u], p.head, imp[v]))
+    return ans
 
 
 def _init_matrix(graph: nx.MultiGraph, wcnf: cfg.CFG) -> tuple[map, Mapping]:
@@ -33,19 +50,19 @@ def _init_matrix(graph: nx.MultiGraph, wcnf: cfg.CFG) -> tuple[map, Mapping]:
         edges[from_terminals[l]] = []
     for u, v, l in graph.edges.data(data="label"):
         edges[from_terminals[l]].append((u, v))
-    matrices = {v: sp.lil_matrix((n, n), dtype=int) for v in wcnf.variables}
+    matrices = {v: sp.lil_matrix((n, n), dtype=bool) for v in wcnf.variables}
 
     mp = Mapping(graph.nodes)
     mpp = mp.get_map()
     for k, v in matrices.items():
         if k in edges:
             for fr, to in edges[k]:
-                v[mpp[fr], mpp[to]] = 1
+                v[mpp[fr], mpp[to]] = True
 
     prod_eps = [p.head for p in wcnf.productions if len(p.body) == 0]
     for k in prod_eps:
         for i in range(n):
-            matrices[k][i, i] = 1
+            matrices[k][i, i] = True
 
     return matrices, mp
 
@@ -84,4 +101,28 @@ def graph_hard():
 cfga = cfg_hard()
 graph = graph_hard()
 
-matrix(graph, cfga)
+a = matrix(graph, cfga)
+
+res = set()
+S = cfg.Variable("S")
+S1 = cfg.Variable("S1")
+B = cfg.Variable("B")
+A = cfg.Variable("A")
+res.add((0, S1, 0))
+res.add((0, S, 0))
+res.add((0, A, 1))
+res.add((0, B, 3))
+res.add((0, S, 3))
+res.add((0, S1, 3))
+res.add((1, S, 0))
+res.add((1, S1, 0))
+res.add((1, A, 2))
+res.add((1, S1, 3))
+res.add((1, S, 3))
+res.add((2, A, 0))
+res.add((2, S1, 0))
+res.add((2, S, 0))
+res.add((2, S, 3))
+res.add((2, S1, 3))
+res.add((3, B, 0))
+print(a.intersection_update(res))
