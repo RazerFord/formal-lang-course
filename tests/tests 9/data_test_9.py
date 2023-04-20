@@ -1,7 +1,8 @@
 from pyformlang import cfg
+import networkx as nx
 
 
-def cfg_hard():
+def cfg_first_hard():
     S = cfg.Variable("S")
     S1 = cfg.Variable("S1")
     B = cfg.Variable("B")
@@ -22,6 +23,24 @@ def cfg_hard():
     )
 
 
+def cfg_second_hard():
+    S = cfg.Variable("S")
+    B = cfg.Variable("B")
+    A = cfg.Variable("A")
+    a = cfg.Terminal("a")
+    b = cfg.Terminal("b")
+    prods = []
+    prods.append(cfg.Production(S, [A, B]))
+    prods.append(cfg.Production(A, [a]))
+    prods.append(cfg.Production(B, [b]))
+    return cfg.CFG(
+        variables={S, A, B},
+        terminals={a, b},
+        start_symbol=S,
+        productions=set(prods),
+    )
+
+
 def graph_hard():
     graph = nx.MultiDiGraph()
     graph.add_edge(0, 1, label="a")
@@ -32,7 +51,7 @@ def graph_hard():
     return graph
 
 
-def answer_hard():
+def answer_hard_first():
     S = cfg.Variable("S")
     S1 = cfg.Variable("S1")
     B = cfg.Variable("B")
@@ -56,5 +75,21 @@ def answer_hard():
             (2, S, 3),
             (2, S1, 3),
             (3, B, 0),
+        ]
+    )
+
+
+def answer_hard_second():
+    S = cfg.Variable("S")
+    B = cfg.Variable("B")
+    A = cfg.Variable("A")
+    return set(
+        [
+            (0, A, 1),
+            (2, S, 3),
+            (1, A, 2),
+            (0, B, 3),
+            (3, B, 0),
+            (2, A, 0),
         ]
     )

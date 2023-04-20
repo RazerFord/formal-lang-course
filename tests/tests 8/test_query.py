@@ -1,4 +1,4 @@
-import data
+import data_test_8 as data
 from project.cfpq import cfpq_hellings
 from pyformlang.cfg import Variable
 

@@ -1,5 +1,5 @@
 import scipy.sparse as sp
-import finite_automata as fa
+import project.finite_automata as fa
 import networkx as nx
 from pyformlang.finite_automaton import DeterministicFiniteAutomaton
 from pyformlang.finite_automaton import State

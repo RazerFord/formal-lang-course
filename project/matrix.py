@@ -2,9 +2,9 @@ import networkx as nx
 import scipy.sparse as sp
 from pyformlang import cfg
 from pathlib import Path
-from context_free_grammar import cfg_to_wcnf
-from context_free_grammar import read_cfg_from_file
-from intersection_finite_automata import Mapping
+from project.context_free_grammar import cfg_to_wcnf
+from project.context_free_grammar import read_cfg_from_file
+from project.intersection_finite_automata import Mapping
 
 
 def matrix(

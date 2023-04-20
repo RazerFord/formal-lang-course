@@ -1,5 +1,5 @@
 from project.hellings import hellings
-import data
+import data_test_8 as data
 
 
 class TestHellings:
