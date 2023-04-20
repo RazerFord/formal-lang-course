@@ -1,4 +1,4 @@
-from project.hellings_reachability import hellings
+from project.hellings import hellings
 import data
 
 
