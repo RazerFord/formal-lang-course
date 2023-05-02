@@ -1,5 +1,5 @@
-from project.hellings_reachability import hellings
-import data
+from project.hellings import hellings
+import data_test_8 as data
 
 
 class TestHellings:
