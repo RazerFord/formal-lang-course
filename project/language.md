@@ -100,7 +100,7 @@ EQUAL: '='
 QUOT: '"'
 LP: '('
 RP: ')'
-LB: '{' 
+LB: '{'
 RB: '}'
 PRINT: 'print'
 BOOL: TRUE | FALSE
