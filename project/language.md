@@ -2,7 +2,7 @@
 - [Оглавление](#оглавление)
   - [Описание абстрактного синтаксиса языка](#описание-абстрактного-синтаксиса-языка)
   - [Описание конкретного синтаксиса языка](#описание-конкретного-синтаксиса-языка)
-  - [Примеры](#примеры)
+  - [Пример](#пример)
 
 
 ## Описание абстрактного синтаксиса языка
@@ -72,10 +72,10 @@ Bool: BOOL
 expr: LP expr RP
     | var
     | val
-    | SET_START OF LIST TO expr
-    | SET_FINAL OF LIST TO expr
-    | ADD_START OF LIST TO expr
-    | ADD_FINAL OF LIST TO expr
+    | SET_START OF (LIST | expr) TO expr
+    | SET_FINAL OF (LIST | expr) TO expr
+    | ADD_START OF (LIST | expr) TO expr
+    | ADD_FINAL OF (LIST | expr) TO expr
     | GET_START OF expr
     | GET_FINAL OF expr
     | GET_REACHABLE OF expr
@@ -90,11 +90,13 @@ expr: LP expr RP
     | expr UNION expr
     | expr IN expr
     | expr KLEENE
+    | expr EQUAL expr
 
-lambda: LAMBDA LP LIST RP ARROW expr
+lambda: LP LAMBDA LIST ARROW expr RP
 
 COMMA: ','
 ASSIGN: ':='
+EQUAL: '='
 QUOT: '"'
 LP: '('
 RP: ')'
@@ -133,6 +135,33 @@ CONCAT: '.'
 UNION: '|'
 IN: 'in'
 KLEENE: '*'
+
+COMMENT: '//'
 ```
 
-## Примеры
+## Пример
+
+```Go
+// Загрузить граф из файла
+g := load "./test/graph"
+
+// Создать переменную типа Int
+start := 1
+
+// Установаить стартовую вершину start в графе g
+ng := set_start of start to g
+
+// Инициализировать лист
+list := {1, 2, 3}
+
+// Установить финальные вершины в графе
+nng := set_final of list tp ng
+
+// Получить достижимые вершины
+vs := get_reachable nng
+
+// Отфильтровать вершины
+vsf := filter (lambda { v } -> v = start) vs
+
+print vsf
+```
