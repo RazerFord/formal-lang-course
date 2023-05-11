@@ -173,12 +173,12 @@ print vsf
 
 Изначально необходимо уставить все зависимости. Для этого в корневой директории необходимо выполнить следующую комманду:
 
-```Shell
+```shell
 pip install -r requirements.txt
 ```
 
 Затем необходимо сгенерировать парсер. Для этого в `project/graph_query_language` необходимо выполнить следующую комманду:
 
-```Shell
+```shell
 antlr4 -Dlanguage=Python3 Language.g4
 ```
