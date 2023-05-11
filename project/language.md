@@ -59,8 +59,8 @@ program: (stmt SEMICOLON)* EOF;
 
 stmt: PRINT | BIND;
 
-print: print expr;
-bind: VAR ASSIGN expr;
+PRINT: print expr;
+BIND: VAR ASSIGN expr;
 
 String: STRING
 Int: DIGIT+
