@@ -40,34 +40,34 @@ expr:
 
 lambda: LP LAMBDA LIST ARROW expr RP;
 
-SET_START: WS? 'set_start' WS?;
-SET_FINAL: WS? 'set_final' WS?;
-ADD_START: WS? 'add_start' WS?;
-ADD_FINAL: WS? 'add_final' WS?;
-GET_START: WS? 'get_start' WS?;
-GET_FINAL: WS? 'get_final' WS?;
-GET_REACHABLE: WS? 'get_reachable' WS?;
-GET_VERTICES: WS? 'get_vertices' WS?;
-GET_EDGES: WS? 'get_edges' WS?;
-GET_LABELS: WS? 'get_labels' WS?;
-MAP: WS? 'map' WS?;
-LAMBDA: WS? 'lambda' WS?;
+SET_START: 'set_start';
+SET_FINAL: 'set_final';
+ADD_START: 'add_start';
+ADD_FINAL: 'add_final';
+GET_START: 'get_start';
+GET_FINAL: 'get_final';
+GET_REACHABLE: 'get_reachable';
+GET_VERTICES: 'get_vertices';
+GET_EDGES: 'get_edges';
+GET_LABELS: 'get_labels';
+MAP: 'map';
+LAMBDA: 'lambda';
 LOAD: 'load';
 FILTER: 'filter';
 ARROW: '->';
-OF: WS? 'of' WS?;
-TO: WS? 'to' WS?;
-INTERSECT: WS? '&' WS?;
-CONCAT: WS? '.' WS?;
-UNION: WS? '|' WS?;
-IN: WS? 'in' WS?;
-KLEENE: WS? '*' WS?;
-EQUAL: WS? '=' WS?;
+OF: 'of';
+TO: 'to';
+INTERSECT: '&';
+CONCAT: '.';
+UNION: '|';
+IN: 'in';
+KLEENE: '*';
+EQUAL: '=';
 
 VAL: BOOL;
 
-PRINT: WS? 'print' WS?;
-ASSIGN: WS? ':=' WS?;
+PRINT: 'print';
+ASSIGN: ':=';
 
 CHAR: [a-zA-Z];
 DIGIT: [0-9];
@@ -78,13 +78,13 @@ BOOL: TRUE | FALSE;
 
 TRUE: 'true';
 FALSE: 'false';
-COMMA: WS? ',' WS?;
-QUOT: WS? '"' WS?;
-LP: WS? '(' WS?;
-RP: WS? ')' WS?;
-LB: WS? '{' WS?;
-RB: WS? '}' WS?;
+COMMA: ',';
+QUOT: '"';
+LP: '(';
+RP: ')';
+LB: '{';
+RB: '}';
 SPACE: ' ';
 WS: [ \t\r]+ -> skip;
-SEMICOLON: WS? ';' WS?;
+SEMICOLON: ';';
 EOL: [\n]+;
