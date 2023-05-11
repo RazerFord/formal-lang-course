@@ -145,4 +145,4 @@ _minted-presentation/
 *.fdb_latexmk
 *.fls
 *.gz
-project/graph_query_language/.antlr
+project/graph_query_language/language
