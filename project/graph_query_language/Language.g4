@@ -5,7 +5,7 @@ program: (stmt SEMICOLON)* EOF;
 stmt: print | bind;
 
 print: PRINT expr;
-bind: VAR ASSIGN expr;
+bind: ID ASSIGN expr;
 
 String: STRING;
 Int: DIGIT+;
@@ -18,7 +18,7 @@ LIST: LB RB | LB T (COMMA T)* RB;
 
 expr:
 	LP expr RP
-	| VAR
+	| var
 	| VAL
 	| LIST
 	| SET_START OF expr TO expr
@@ -43,6 +43,7 @@ expr:
 
 lambda: LP LAMBDA LIST ARROW expr RP;
 
+var: ID;
 SET_START: 'set_start';
 SET_FINAL: 'set_final';
 ADD_START: 'add_start';
@@ -75,7 +76,7 @@ ASSIGN: ':=';
 CHAR: [a-zA-Z];
 DIGIT: [0-9];
 CHAR_D: CHAR | DIGIT;
-VAR: CHAR CHAR_D*;
+ID: CHAR CHAR_D*;
 STRING: QUOT (CHAR_D | [ _])* QUOT;
 BOOL: TRUE | FALSE;
 
