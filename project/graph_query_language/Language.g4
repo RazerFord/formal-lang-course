@@ -7,20 +7,20 @@ stmt: print | bind;
 print: PRINT expr;
 bind: ID ASSIGN expr;
 
-String: STRING;
+string: STRING;
 Int: DIGIT+;
 Vertex: Int;
 Edge: LP Int COMMA STRING COMMA RP;
-Graph: LP LIST COMMA LIST RP;
+Graph: LP List COMMA List RP;
 Bool: BOOL;
 T: BOOL | DIGIT | CHAR | STRING | Vertex | Edge;
-LIST: LB RB | LB T (COMMA T)* RB;
+List: LB RB | LB T (COMMA T)* RB;
 
 expr:
 	LP expr RP
 	| var
-	| VAL
-	| LIST
+	| val
+	| List
 	| SET_START OF expr TO expr
 	| SET_FINAL OF expr TO expr
 	| ADD_START OF expr TO expr
@@ -33,7 +33,7 @@ expr:
 	| GET_LABELS OF expr
 	| MAP lambda expr
 	| FILTER lambda expr
-	| LOAD STRING
+	| LOAD string
 	| expr INTERSECT expr
 	| expr CONCAT expr
 	| expr UNION expr
@@ -41,9 +41,11 @@ expr:
 	| expr KLEENE
 	| expr EQUAL expr;
 
-lambda: LP LAMBDA LIST ARROW expr RP;
-
 var: ID;
+val: string | Int | Vertex | Edge | Graph | Bool | List;
+
+lambda: LP LAMBDA List ARROW expr RP;
+
 SET_START: 'set_start';
 SET_FINAL: 'set_final';
 ADD_START: 'add_start';
@@ -68,8 +70,6 @@ IN: 'in';
 KLEENE: '*';
 EQUAL: '=';
 
-VAL: BOOL;
-
 PRINT: 'print';
 ASSIGN: ':=';
 
@@ -77,8 +77,8 @@ CHAR: [a-zA-Z];
 DIGIT: [0-9];
 CHAR_D: CHAR | DIGIT;
 ID: CHAR CHAR_D*;
-STRING: QUOT (CHAR_D | [ _])* QUOT;
 BOOL: TRUE | FALSE;
+STRING: QUOT (CHAR_D | [ _])* QUOT;
 
 TRUE: 'true';
 FALSE: 'false';
