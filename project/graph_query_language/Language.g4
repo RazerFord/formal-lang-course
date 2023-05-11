@@ -1,8 +1,11 @@
 grammar Language;
 
-program: (EOL? WS? stmt SEMICOLON EOL? WS?)* EOF;
+program: (stmt SEMICOLON)* EOF;
 
-stmt: PRINT expr | VAR ASSIGN expr;
+stmt: print | bind;
+
+print: PRINT expr;
+bind: VAR ASSIGN expr;
 
 String: STRING;
 Int: DIGIT+;
@@ -84,7 +87,6 @@ LP: '(';
 RP: ')';
 LB: '{';
 RB: '}';
-SPACE: ' ';
-WS: [ \t\r]+ -> skip;
+WS: [ \n\t\r]+ -> channel(HIDDEN);
+COMMENT: '//' ~[\n]* -> skip;
 SEMICOLON: ';';
-EOL: [\n]+;
