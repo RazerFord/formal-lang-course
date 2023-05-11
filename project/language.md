@@ -180,5 +180,5 @@ pip install -r requirements.txt
 Затем необходимо сгенерировать парсер. Для этого в `project/graph_query_language` необходимо выполнить следующую комманду:
 
 ```shell
-antlr4 -Dlanguage=Python3 Language.g4
+antlr4 -Dlanguage=Python3 -visitor Language.g4 -o language
 ```
