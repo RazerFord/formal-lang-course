@@ -29,6 +29,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate parser
+        working-directory: project/graph_query_language
         run: |
           antlr4 -Dlanguage=Python3 -visitor Language.g4 -o project/graph_query_language/language
 
