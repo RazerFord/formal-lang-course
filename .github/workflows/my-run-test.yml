@@ -30,7 +30,7 @@ jobs:
 
       - name: Generate parser
         run: |
-          antlr4 -Dlanguage=Python3 -visitor Language.g4 -o language
+          antlr4 -Dlanguage=Python3 -visitor Language.g4 -o project/graph_query_language/language
 
       - name: Run tests
         run: python3 ./scripts/run_tests.py
