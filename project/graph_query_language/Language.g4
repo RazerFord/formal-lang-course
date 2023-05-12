@@ -27,7 +27,7 @@ expr:
 	| GET_LABELS OF expr
 	| MAP lambda expr
 	| FILTER lambda expr
-	| LOAD string
+	| LOAD (string | var)
 	| expr INTERSECT expr
 	| expr CONCAT expr
 	| expr UNION expr
