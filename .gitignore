@@ -146,4 +146,4 @@ _minted-presentation/
 *.fls
 *.gz
 project/graph_query_language/language
-project/graph_query_language/.anlr
+project/graph_query_language/.antlr
