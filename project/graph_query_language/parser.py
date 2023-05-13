@@ -44,16 +44,15 @@ def check_input(text: str) -> bool:
 
 
 class TreeListener(LanguageListener):
-    """
-    Parameters
-    ----------
-        text: str
-            Text to check
-        Returns
-    ----------
-    """
-
     def __init__(self, text: str):
+        """
+        Parameters
+        ----------
+            text: str
+                Text to check
+            Returns
+        ----------
+        """
         parser = build_parser(text)
         self.ast = parser.program()
         if parser.getNumberOfSyntaxErrors() != 0:
