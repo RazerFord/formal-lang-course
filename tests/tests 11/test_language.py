@@ -1,4 +1,7 @@
 from project.graph_query_language.parser import check_input
+from project.graph_query_language.parser import TreeListener
+import expected_graph as eg
+import os
 
 
 class TestLanguage:
@@ -68,3 +71,14 @@ class TestLanguage:
         assert check_input(
             'g := (map (lambda {x, y} -> x) load "graph") & (filter (lambda {x, y} -> false) load "graph");'
         )
+
+    def test_tree(self):
+        path = "path.dot"
+        TreeListener("s := 1;").save_in_dot(path)
+        f = open(path, mode="r")
+        text = f.read()
+        print(text)
+        f.close()
+        assert eg.tree == text
+        if os.path.exists(path):
+            os.remove(path)
