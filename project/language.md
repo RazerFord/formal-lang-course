@@ -3,6 +3,7 @@
   - [Описание абстрактного синтаксиса языка](#описание-абстрактного-синтаксиса-языка)
   - [Описание конкретного синтаксиса языка](#описание-конкретного-синтаксиса-языка)
   - [Пример](#пример)
+  - [Генерация парсера](#генерация-парсера)
 
 
 ## Описание абстрактного синтаксиса языка
@@ -58,13 +59,13 @@ program: (stmt SEMICOLON)* EOF;
 
 stmt: PRINT | BIND;
 
-print: print expr;
-bind: VAR ASSIGN expr;
+PRINT: print expr;
+BIND: VAR ASSIGN expr;
 
 String: STRING
 Int: DIGIT+
 Vertex: INT
-Edge: LP INT COMMA STRING COMMA RP
+Edge: LP INT COMMA STRING COMMA INT RP
 Graph: LP LIST COMMA LIST RP
 Bool: BOOL
 
@@ -164,4 +165,20 @@ vs := get_reachable nng
 vsf := filter (lambda { v } -> v = start) vs
 
 print vsf
+```
+
+## Генерация парсера
+
+Инструкция по генерации парсера.
+
+Изначально необходимо уставить все зависимости. Для этого в корневой директории необходимо выполнить следующую комманду:
+
+```shell
+pip install -r requirements.txt
+```
+
+Затем необходимо сгенерировать парсер. Для этого в `project/graph_query_language` необходимо выполнить следующую комманду:
+
+```shell
+antlr4 -Dlanguage=Python3 -visitor Language.g4 -o language
 ```
