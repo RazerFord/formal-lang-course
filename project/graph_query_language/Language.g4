@@ -11,8 +11,7 @@ PRINT: 'print';
 ASSIGN: ':=';
 
 expr:
-	LP expr RP
-	| var
+	var
 	| val
 	| lambda
 	| set_start of expr to expr
