@@ -41,11 +41,6 @@ class Visitor(LanguageVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LanguageParser#var.
-    def visitVar(self, ctx:LanguageParser.VarContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LanguageParser#val.
     def visitVal(self, ctx:LanguageParser.ValContext):
         return self.visitChildren(ctx)
@@ -81,14 +76,23 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#list.
     def visitList(self, ctx:LanguageParser.ListContext):
-        return self.visitChildren(ctx)
+        result = []
+        n = ctx.getChildCount()
+        for i in range(1,n-1,2):
+            if not self.shouldVisitNextChild(ctx, result):
+                return result
+
+            c = ctx.getChild(i)
+            child_result = c.accept(self)
+            result.append(child_result)
+        return result
 
 
     # Visit a parse tree produced by LanguageParser#graph.
     def visitGraph(self, ctx:LanguageParser.GraphContext):
         vertexes = self.visitList(ctx.getChild(1))
         edges =  self.visitList(ctx.getChild(3))
-        return self.visitChildren(ctx)
+        return tp.Graph(vertexes, edges)
 
 
     # Visit a parse tree produced by LanguageParser#id.

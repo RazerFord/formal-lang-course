@@ -1,4 +1,5 @@
 from exceptions import InvalidArgument
+import networkx as nx
 
 class Edge:
     def __init__(self, fst, label, snd) -> None:
@@ -29,3 +30,13 @@ class String:
     
     def __str__(self) -> str:
         return self.value
+    
+class Graph:
+    def __init__(self, vertexes, edges) -> None:
+        self.gr = nx.MultiGraph()
+        self.gr.add_nodes_from(vertexes)
+        for edge in edges:
+            self.gr.add_edge(edge.fst, edge.snd, label=edge.label)
+    
+    def __str__(self) -> str:
+        return self.gr.__str__()
