@@ -7,3 +7,4 @@ def interpreter(text_prog: str) -> str:
     visitor = Visitor()
 
     visitor.visit(tree)
+    
