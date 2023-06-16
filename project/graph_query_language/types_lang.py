@@ -33,7 +33,7 @@ class String:
     
 class Graph:
     def __init__(self, vertexes, edges) -> None:
-        self.gr = nx.MultiGraph()
+        self.gr = nx.MultiDiGraph()
         self.gr.add_nodes_from(vertexes)
         for edge in edges:
             self.gr.add_edge(edge.fst, edge.snd, label=edge.label)
@@ -58,6 +58,9 @@ class Graph:
     def add_final_nodes(self, nodes:list[int]):
         self.gr.add_nodes_from(nodes)
         self.final_nodes += nodes
+
+    def get_reachable(self):
+        return list(nx.transitive_closure(nx.DiGraph(self.gr)).edges())
 
 class Bool:
     def __init__(self, value) -> None:

@@ -21,7 +21,7 @@ expr:
 	| add_final
 	| get_start
 	| get_final
-	| get_reachable of expr
+	| get_reachable
 	| get_vertices of expr
 	| get_edges of expr
 	| get_labels of expr
@@ -61,7 +61,7 @@ source: var | integer | list;
 get_start: 'get_start' of target;
 get_final: 'get_final' of target;
 
-get_reachable: 'get_reachable';
+get_reachable: 'get_reachable' of target;
 get_vertices: 'get_vertices';
 get_edges: 'get_edges';
 get_labels: 'get_labels';

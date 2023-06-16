@@ -147,7 +147,8 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#get_reachable.
     def visitGet_reachable(self, ctx:LanguageParser.Get_reachableContext):
-        return self.visitChildren(ctx)
+        target = self._get_target_graph(ctx)
+        return target.get_reachable()
 
 
     # Visit a parse tree produced by LanguageParser#get_vertices.
