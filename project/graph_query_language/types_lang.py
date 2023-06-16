@@ -37,6 +37,8 @@ class Graph:
         self.gr.add_nodes_from(vertexes)
         for edge in edges:
             self.gr.add_edge(edge.fst, edge.snd, label=edge.label)
+        self.start_nodes = self.gr.nodes
+        self.final_nodes = self.gr.nodes
     
     def __str__(self) -> str:
         return self.gr.__str__()

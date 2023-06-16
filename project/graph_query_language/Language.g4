@@ -15,10 +15,10 @@ expr:
 	| var
 	| val
 	| lambda
-	| set_start of expr to expr
-	| set_final of expr to expr
-	| add_start of expr to expr
-	| add_final of expr to expr
+	| set_start
+	| set_final
+	| add_start
+	| add_final
 	| get_start of expr
 	| get_final of expr
 	| get_reachable of expr
@@ -51,10 +51,14 @@ id: (CHAR (CHAR | DIGIT)*);
 CHAR: [a-zA-Z_];
 DIGIT: [0-9];
 
-set_start: 'set_start';
-set_final: 'set_final';
-add_start: 'add_start';
-add_final: 'add_final';
+set_start: 'set_start' of source to target;
+set_final: 'set_final' of source to target;
+add_start: 'add_start' of source to target;
+add_final: 'add_final' of source to target;
+target: var | graph;
+source: var | integer | list;
+
+ADD_FINAL: 'add_final';
 get_start: 'get_start';
 get_final: 'get_final';
 get_reachable: 'get_reachable';

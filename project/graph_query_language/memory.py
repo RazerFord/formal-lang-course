@@ -6,9 +6,7 @@ class Memory:
         self.box : dict[str, any] = {}
 
     def __getitem__(self, key : Id):
-        if key.value in self.box:
-            return self.box[key.value]
-        raise InvalidArgument("variable is not defined")
+        return self.get(key.value)
     
     def __setitem__(self, key : Id , value):
         if key.value in self.box and type(value) is not type(self.box[key.value]):
@@ -18,3 +16,7 @@ class Memory:
     def contains(self, key : Id) -> bool:
         return key.value in self.box
     
+    def get(self, key: str) -> bool:
+        if key in self.box:
+            return self.box[key]
+        raise InvalidArgument(f"variable '{key}' is not defined")

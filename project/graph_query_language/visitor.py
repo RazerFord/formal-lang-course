@@ -1,6 +1,8 @@
 from language.LanguageVisitor import LanguageVisitor
 from language.LanguageParser import LanguageParser
 from memory import Memory
+from typing import Union
+from exceptions import InvalidArgument
 
 import types_lang as tp
 
@@ -101,6 +103,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#set_start.
     def visitSet_start(self, ctx:LanguageParser.Set_startContext):
+        source = self._get_source(ctx)
+        target = self._get_target_graph(ctx)
+        print(source)
+        print(target)
         return self.visitChildren(ctx)
 
 
@@ -202,3 +208,31 @@ class Visitor(LanguageVisitor):
     # Visit a parse tree produced by LanguageParser#equal.
     def visitEqual(self, ctx:LanguageParser.EqualContext):
         return self.visitChildren(ctx)
+
+    def _get_source(self, ctx: Union[
+        LanguageParser.Set_startContext, 
+        LanguageParser.Set_finalContext,
+        LanguageParser.Add_startContext,
+        LanguageParser.Add_finalContext]):
+        source = ctx.source()
+        if source.var() is not None:
+            return self.memory[source.var().getText()].start_nodes
+        if source.integer() is not None:
+            return [int(source.integer())]
+        if source.list_() is not None:
+            return self.visitList(source.list_())
+
+    def _get_target_graph(self, ctx: Union[
+        LanguageParser.Set_startContext, 
+        LanguageParser.Set_finalContext,
+        LanguageParser.Add_startContext,
+        LanguageParser.Add_finalContext]):
+        target = ctx.target()
+        if target.var() is not None:
+            name = target.var().getText()
+            graph = self.memory.get(name)
+            if isinstance(graph, tp.Graph):
+                return graph
+            raise InvalidArgument(f"target argument '{name}' is not a graph")
+        if target.graph() is not None:
+            return self.visitGraph(target.graph())
