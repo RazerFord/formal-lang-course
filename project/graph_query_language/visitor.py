@@ -3,10 +3,13 @@ from language.LanguageParser import LanguageParser
 from memory import Memory
 from typing import Union
 from exceptions import InvalidArgument
+from pathlib import Path
+# from ..graph_info import get_graph_by_name
 
-
+import cfpq_data
 import types_lang as tp
 import networkx as nx
+
 
 class Visitor(LanguageVisitor):
     memory : Memory = Memory()
@@ -190,7 +193,15 @@ class Visitor(LanguageVisitor):
     # Visit a parse tree produced by LanguageParser#load.
     def visitLoad(self, ctx:LanguageParser.LoadContext):
         filename = self._get_filename(ctx).replace('"','')
-        return tp.Graph(graph=nx.read_edgelist(filename))
+        path = Path(filename)
+        graph = None
+        if path.is_file():
+            graph=nx.read_edgelist(filename)
+        else:
+            graph_path = cfpq_data.download(filename)
+            graph= cfpq_data.graph_from_csv(graph_path)
+            # graph=get_graph_by_name(filename)
+        return tp.Graph(graph=graph)
 
 
     # Visit a parse tree produced by LanguageParser#filter.

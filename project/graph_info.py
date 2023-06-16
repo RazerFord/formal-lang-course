@@ -6,13 +6,18 @@ GraphInfo = namedtuple("GraphInfo", "number_of_nodes number_of_edges labels")
 
 
 def get_graph_info_by_name(graph_name: str) -> GraphInfo:
-    graph_path = cfpq_data.download(graph_name)
-    graph = cfpq_data.graph_from_csv(graph_path)
+    graph = get_graph_by_name(graph_name)
 
     labels = parse_labels(graph)
     graph_info = GraphInfo(graph.number_of_nodes(), graph.number_of_edges(), labels)
 
     return graph_info
+
+
+def get_graph_by_name(graph_name: str) -> networkx.MultiDiGraph:
+    graph_path = cfpq_data.download(graph_name)
+    return cfpq_data.graph_from_csv(graph_path)
+
 
 
 def parse_labels(graph) -> set:
