@@ -41,7 +41,7 @@ var: id;
 val: integer | string | edge | list | bool | graph;
 
 bool: TRUE | FALSE;
-string: QUOT (CHAR | DIGIT)* QUOT;
+string: STRING_LITERAL;
 integer: DIGIT+;
 edge: LP integer COMMA string COMMA integer RP;
 item: string | integer | edge | bool | var;
@@ -86,3 +86,4 @@ RB: '}';
 WS: [ \n\t\r]+ -> channel(HIDDEN);
 COMMENT: '//' ~[\n]* -> skip;
 SEMICOLON: ';';
+STRING_LITERAL: QUOT (~["\\] | '\\' .)* QUOT;
