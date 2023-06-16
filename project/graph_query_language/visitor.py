@@ -153,18 +153,20 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#get_vertices.
     def visitGet_vertices(self, ctx:LanguageParser.Get_verticesContext):
-        return self.visitChildren(ctx)
+        target = self._get_target_graph(ctx)
+        return target.get_vertices()
 
 
     # Visit a parse tree produced by LanguageParser#get_edges.
     def visitGet_edges(self, ctx:LanguageParser.Get_edgesContext):
-        return self.visitChildren(ctx)
+        target = self._get_target_graph(ctx)
+        return target.get_edges()
 
 
     # Visit a parse tree produced by LanguageParser#get_labels.
     def visitGet_labels(self, ctx:LanguageParser.Get_labelsContext):
-        return self.visitChildren(ctx)
-
+        target = self._get_target_graph(ctx)
+        return target.get_labels()
 
     # Visit a parse tree produced by LanguageParser#map.
     def visitMap(self, ctx:LanguageParser.MapContext):

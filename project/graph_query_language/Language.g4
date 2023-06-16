@@ -22,9 +22,9 @@ expr:
 	| get_start
 	| get_final
 	| get_reachable
-	| get_vertices of expr
-	| get_edges of expr
-	| get_labels of expr
+	| get_vertices
+	| get_edges
+	| get_labels
 	| map lambda expr
 	| filter lambda expr
 	| load (string | var)
@@ -62,9 +62,10 @@ get_start: 'get_start' of target;
 get_final: 'get_final' of target;
 
 get_reachable: 'get_reachable' of target;
-get_vertices: 'get_vertices';
-get_edges: 'get_edges';
-get_labels: 'get_labels';
+get_vertices: 'get_vertices' of target;
+get_edges: 'get_edges' of target;
+get_labels: 'get_labels' of target;
+
 map: 'map';
 LAMBDA_DEF: 'lambda';
 load: 'load';

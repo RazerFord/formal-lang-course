@@ -36,7 +36,7 @@ class Graph:
         self.gr = nx.MultiDiGraph()
         self.gr.add_nodes_from(vertexes)
         for edge in edges:
-            self.gr.add_edge(edge.fst, edge.snd, label=edge.label)
+            self.gr.add_edge(edge.fst, edge.snd, label=edge.label.replace("\"", ''))
         self.start_nodes = list(self.gr.nodes)
         self.final_nodes = list(self.gr.nodes)
     
@@ -61,6 +61,24 @@ class Graph:
 
     def get_reachable(self):
         return list(nx.transitive_closure(nx.DiGraph(self.gr)).edges())
+    
+    def get_vertices(self):
+        return list(self.gr.nodes)
+
+    def get_edges(self):
+        result = []
+        for u, v, l in self.gr.edges(data=True):
+            for label in l.values():
+                result.append((u, label, v)); 
+        return result
+
+    def get_labels(self):
+        result = set()
+        for _, _, l in self.gr.edges(data=True):
+            for label in l.values():
+                result.add(label); 
+        return list(result)
+
 
 class Bool:
     def __init__(self, value) -> None:
