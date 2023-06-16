@@ -111,7 +111,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#set_final.
     def visitSet_final(self, ctx:LanguageParser.Set_finalContext):
-        return self.visitChildren(ctx)
+        source = self._get_source(ctx)
+        target = self._get_target_graph(ctx)
+        target.add_final_nodes(source)
+        return target
 
 
     # Visit a parse tree produced by LanguageParser#add_start.
