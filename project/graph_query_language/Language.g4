@@ -26,7 +26,7 @@ expr:
 	| get_edges
 	| get_labels
 	| map
-	| filter lambda expr
+	| filter
 	| load (string | var)
 	| expr intersect expr
 	| expr concat expr
@@ -67,7 +67,7 @@ get_edges: 'get_edges' of target;
 get_labels: 'get_labels' of target;
 
 map: 'map' (lambda | var) ':' iterable;
-filter: 'filter';
+filter: 'filter' (lambda | var) ':' iterable;
 iterable: list | var;
 LAMBDA_DEF: 'lambda';
 load: 'load';

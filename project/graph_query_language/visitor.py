@@ -175,11 +175,12 @@ class Visitor(LanguageVisitor):
         iterable = self._get_iterable(ctx)
         result = []
         for args in iterable:
+            if not isinstance(args, list):
+                args = [args]
             if len(args) != len(lam.args):
                 raise InvalidArgument("the number of arguments and the number of parameters in the lambda are not the same")
             for n, v in zip(lam.args, args):
                 self.memory[n] = v
-                print(self.memory[n])
             result.append(self.memory[self.visitExpr(lam.body)])
         return result
 
@@ -191,7 +192,20 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#filter.
     def visitFilter(self, ctx:LanguageParser.FilterContext):
-        return self.visitChildren(ctx)
+        lam = self._get_lambda(ctx)
+        iterable = self._get_iterable(ctx)
+        result = []
+        for args in iterable:
+            _iter = args
+            if not isinstance(args, list):
+                _iter = [_iter]
+            if len(_iter) != len(lam.args):
+                raise InvalidArgument("the number of arguments and the number of parameters in the lambda are not the same")
+            for n, v in zip(lam.args, _iter):
+                self.memory[n] = v
+            if self.memory[self.visitExpr(lam.body)].value == True:
+                result.append(args)
+        return result
 
 
     # Visit a parse tree produced by LanguageParser#of.
