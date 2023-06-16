@@ -27,7 +27,7 @@ expr:
 	| get_labels
 	| map
 	| filter
-	| load (string | var)
+	| load
 	| expr intersect expr
 	| expr concat expr
 	| expr union expr
@@ -70,7 +70,7 @@ map: 'map' (lambda | var) ':' iterable;
 filter: 'filter' (lambda | var) ':' iterable;
 iterable: list | var;
 LAMBDA_DEF: 'lambda';
-load: 'load';
+load: 'load' (string | var);
 ARROW: '->';
 of: 'of';
 to: 'to';

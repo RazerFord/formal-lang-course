@@ -32,11 +32,15 @@ class String:
         return self.value
     
 class Graph:
-    def __init__(self, vertexes, edges) -> None:
-        self.gr = nx.MultiDiGraph()
-        self.gr.add_nodes_from(vertexes)
-        for edge in edges:
-            self.gr.add_edge(edge.fst, edge.snd, label=edge.label.replace("\"", ''))
+    def __init__(self, vertexes = None, edges = None, graph = None) -> None:
+        self.gr = None
+        if graph is None:
+            self.gr = nx.MultiDiGraph()
+            self.gr.add_nodes_from(vertexes)
+            for edge in edges:
+                self.gr.add_edge(edge.fst, edge.snd, label=edge.label.replace("\"", ''))
+        else:
+            self.gr = nx.MultiDiGraph(graph)
         self.start_nodes = list(self.gr.nodes)
         self.final_nodes = list(self.gr.nodes)
     

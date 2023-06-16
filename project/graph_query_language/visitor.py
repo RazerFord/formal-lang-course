@@ -4,7 +4,9 @@ from memory import Memory
 from typing import Union
 from exceptions import InvalidArgument
 
+
 import types_lang as tp
+import networkx as nx
 
 class Visitor(LanguageVisitor):
     memory : Memory = Memory()
@@ -187,7 +189,8 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#load.
     def visitLoad(self, ctx:LanguageParser.LoadContext):
-        return self.visitChildren(ctx)
+        filename = self._get_filename(ctx).replace('"','')
+        return tp.Graph(graph=nx.read_edgelist(filename))
 
 
     # Visit a parse tree produced by LanguageParser#filter.
@@ -259,6 +262,12 @@ class Visitor(LanguageVisitor):
             return self.visitList(iterable.list_())
         if iterable.var() is not None:
             return self.memory.get(iterable.var().getText())
+
+    def _get_filename(self, ctx:LanguageParser.LoadContext)->str:
+        if ctx.string() is not None:
+            return ctx.string()
+        if ctx.var() is not None:
+            return self.memory.get(ctx.var().getText())
 
     def _get_source(self, ctx: Union[
         LanguageParser.Set_startContext, 
