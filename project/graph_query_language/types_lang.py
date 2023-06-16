@@ -43,6 +43,14 @@ class Graph:
     def __str__(self) -> str:
         return self.gr.__str__()
 
+    def add_start_nodes(self, nodes:list[int]):
+        self.gr.add_nodes_from(nodes)
+        self.start_nodes = nodes
+    
+    def add_final_nodes(self, nodes:list[int]):
+        self.gr.add_nodes_from(nodes)
+        self.final_nodes = nodes
+
 class Bool:
     def __init__(self, value) -> None:
         self.value = value

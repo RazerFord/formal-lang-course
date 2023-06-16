@@ -105,9 +105,8 @@ class Visitor(LanguageVisitor):
     def visitSet_start(self, ctx:LanguageParser.Set_startContext):
         source = self._get_source(ctx)
         target = self._get_target_graph(ctx)
-        print(source)
-        print(target)
-        return self.visitChildren(ctx)
+        target.add_start_nodes(source)
+        return target
 
 
     # Visit a parse tree produced by LanguageParser#set_final.
@@ -216,7 +215,7 @@ class Visitor(LanguageVisitor):
         LanguageParser.Add_finalContext]):
         source = ctx.source()
         if source.var() is not None:
-            return self.memory[source.var().getText()].start_nodes
+            return self.memory.get(source.var().getText()).start_nodes
         if source.integer() is not None:
             return [int(source.integer())]
         if source.list_() is not None:
