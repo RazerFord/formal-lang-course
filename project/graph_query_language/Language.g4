@@ -19,8 +19,8 @@ expr:
 	| set_final
 	| add_start
 	| add_final
-	| get_start of expr
-	| get_final of expr
+	| get_start
+	| get_final
 	| get_reachable of expr
 	| get_vertices of expr
 	| get_edges of expr
@@ -58,9 +58,9 @@ add_final: 'add_final' of source to target;
 target: var | graph;
 source: var | integer | list;
 
-ADD_FINAL: 'add_final';
-get_start: 'get_start';
-get_final: 'get_final';
+get_start: 'get_start' of target;
+get_final: 'get_final' of target;
+
 get_reachable: 'get_reachable';
 get_vertices: 'get_vertices';
 get_edges: 'get_edges';

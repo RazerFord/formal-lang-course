@@ -135,12 +135,14 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#get_start.
     def visitGet_start(self, ctx:LanguageParser.Get_startContext):
-        return self.visitChildren(ctx)
+        target = self._get_target_graph(ctx)
+        return target.start_nodes
 
 
     # Visit a parse tree produced by LanguageParser#get_final.
     def visitGet_final(self, ctx:LanguageParser.Get_finalContext):
-        return self.visitChildren(ctx)
+        target = self._get_target_graph(ctx)
+        return target.final_nodes
 
 
     # Visit a parse tree produced by LanguageParser#get_reachable.
