@@ -29,7 +29,7 @@ class Visitor(LanguageVisitor):
         name = self.visitId(ctx.id_())
         value = self.visitExpr(ctx.expr())
         self.memory[name] = value
-        return self.visitChildren(ctx)
+        return self.defaultResult()
 
     # Visit a parse tree produced by LanguageParser#expr.
     def visitExpr(self, ctx:LanguageParser.ExprContext):
@@ -58,17 +58,12 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#string.
     def visitString(self, ctx:LanguageParser.StringContext):
-        return ctx.getText()
+        return str(ctx.getText())
 
 
     # Visit a parse tree produced by LanguageParser#integer.
     def visitInteger(self, ctx:LanguageParser.IntegerContext):
         return int(ctx.getText())
-
-
-    # Visit a parse tree produced by LanguageParser#vertex.
-    def visitVertex(self, ctx:LanguageParser.VertexContext):
-        return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by LanguageParser#edge.
@@ -91,6 +86,8 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#graph.
     def visitGraph(self, ctx:LanguageParser.GraphContext):
+        vertexes = self.visitList(ctx.getChild(1))
+        edges =  self.visitList(ctx.getChild(3))
         return self.visitChildren(ctx)
 
 

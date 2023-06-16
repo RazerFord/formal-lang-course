@@ -38,14 +38,13 @@ expr:
 lambda: LP LAMBDA_DEF list ARROW expr RP;
 
 var: id;
-val: integer | string | vertex | edge | list | bool | graph;
+val: integer | string | edge | list | bool | graph;
 
 bool: TRUE | FALSE;
 string: QUOT (CHAR | DIGIT)* QUOT;
 integer: DIGIT+;
-vertex: integer;
 edge: LP integer COMMA string COMMA integer RP;
-item: string | integer | vertex | edge | bool | var;
+item: string | integer | edge | bool | var;
 list: LB RB | LB item (COMMA item)* RB;
 graph: LP list COMMA list RP;
 

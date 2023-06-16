@@ -1,5 +1,5 @@
-from project.graph_query_language.parser import check_input
-from project.graph_query_language.parser import TreeListener
+from project.graph_query_language.language_parser import check_input
+from project.graph_query_language.language_parser import TreeListener
 import expected_graph as eg
 import os
 
