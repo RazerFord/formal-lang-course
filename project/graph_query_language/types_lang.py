@@ -37,19 +37,27 @@ class Graph:
         self.gr.add_nodes_from(vertexes)
         for edge in edges:
             self.gr.add_edge(edge.fst, edge.snd, label=edge.label)
-        self.start_nodes = self.gr.nodes
-        self.final_nodes = self.gr.nodes
+        self.start_nodes = list(self.gr.nodes)
+        self.final_nodes = list(self.gr.nodes)
     
     def __str__(self) -> str:
         return self.gr.__str__()
 
-    def add_start_nodes(self, nodes:list[int]):
+    def set_start_nodes(self, nodes:list[int]):
         self.gr.add_nodes_from(nodes)
         self.start_nodes = nodes
     
-    def add_final_nodes(self, nodes:list[int]):
+    def set_final_nodes(self, nodes:list[int]):
         self.gr.add_nodes_from(nodes)
         self.final_nodes = nodes
+
+    def add_start_nodes(self, nodes:list[int]):
+        self.gr.add_nodes_from(nodes)
+        self.start_nodes += nodes
+    
+    def add_final_nodes(self, nodes:list[int]):
+        self.gr.add_nodes_from(nodes)
+        self.final_nodes += nodes
 
 class Bool:
     def __init__(self, value) -> None:
