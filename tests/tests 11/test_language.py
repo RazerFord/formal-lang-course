@@ -46,7 +46,7 @@ class TestLanguage:
 
     def test_functional(self):
         assert check_input("fn :=(lambda {x, y} -> x & y | x);")
-        assert check_input("f := (map (lambda {x, y} -> xy) per);")
+        assert check_input("f := (map (lambda {x, y} -> xy) : per);")
         assert check_input("f := (filter (lambda {x, y} -> xy) per);")
 
     def test_load(self):
@@ -61,15 +61,15 @@ class TestLanguage:
         assert check_input("g := g1*;")
 
     def test_fail(self):
-        assert not check_input("load (map (lambda {x, y} -> xy) per);")
+        assert not check_input("load (map (lambda {x, y} -> xy) : per);")
+        assert not check_input('g := (map (lambda {x, y} -> xy) : load "graph");')
         assert not check_input("g := g1 & g := g2;")
         assert not check_input("g := g1 in := 2;")
 
     def test_commbine(self):
-        assert check_input('g := (map (lambda {x, y} -> xy) load "graph");')
         assert check_input('g := (filter (lambda {x, y} -> true) load "graph");')
         assert check_input(
-            'g := (map (lambda {x, y} -> x) load "graph") & (filter (lambda {x, y} -> false) load "graph");'
+            'g := (map (lambda {x, y} -> x) : {graph}) & (filter (lambda {x, y} -> false) load "graph");'
         )
 
     def test_tree(self):
