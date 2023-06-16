@@ -171,7 +171,17 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#map.
     def visitMap(self, ctx:LanguageParser.MapContext):
-        return self.visitChildren(ctx)
+        lam = self._get_lambda(ctx)
+        iterable = self._get_iterable(ctx)
+        result = []
+        for args in iterable:
+            if len(args) != len(lam.args):
+                raise InvalidArgument("the number of arguments and the number of parameters in the lambda are not the same")
+            for n, v in zip(lam.args, args):
+                self.memory[n] = v
+                print(self.memory[n])
+            result.append(self.memory[self.visitExpr(lam.body)])
+        return result
 
 
     # Visit a parse tree produced by LanguageParser#load.
@@ -222,6 +232,19 @@ class Visitor(LanguageVisitor):
     # Visit a parse tree produced by LanguageParser#equal.
     def visitEqual(self, ctx:LanguageParser.EqualContext):
         return self.visitChildren(ctx)
+
+    def _get_lambda(self, ctx:LanguageParser.MapContext) -> tp.Lambda:
+        if ctx.lambda_() is not None:
+            return self.visitLambda(ctx.lambda_())
+        if ctx.var() is not None:
+            return self.memory.get(ctx.var().getText())
+
+    def _get_iterable(self, ctx:LanguageParser.MapContext) -> tp.Lambda:
+        iterable = ctx.iterable()
+        if iterable.list_() is not None:
+            return self.visitList(iterable.list_())
+        if iterable.var() is not None:
+            return self.memory.get(iterable.var().getText())
 
     def _get_source(self, ctx: Union[
         LanguageParser.Set_startContext, 

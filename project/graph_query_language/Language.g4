@@ -25,7 +25,7 @@ expr:
 	| get_vertices
 	| get_edges
 	| get_labels
-	| map lambda expr
+	| map
 	| filter lambda expr
 	| load (string | var)
 	| expr intersect expr
@@ -66,10 +66,11 @@ get_vertices: 'get_vertices' of target;
 get_edges: 'get_edges' of target;
 get_labels: 'get_labels' of target;
 
-map: 'map';
+map: 'map' (lambda | var) ':' iterable;
+filter: 'filter';
+iterable: list | var;
 LAMBDA_DEF: 'lambda';
 load: 'load';
-filter: 'filter';
 ARROW: '->';
 of: 'of';
 to: 'to';

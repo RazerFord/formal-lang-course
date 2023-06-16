@@ -18,7 +18,7 @@ class Id:
     def __str__(self) -> str:
         if self.memory.contains(self):
             return str(self.memory[self])
-        raise InvalidArgument("no variable found with this name")
+        raise InvalidArgument(f"no variable found with this name {self._value}")
 
     @property
     def value(self):
