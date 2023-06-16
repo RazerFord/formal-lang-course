@@ -40,7 +40,9 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#lambda.
     def visitLambda(self, ctx:LanguageParser.LambdaContext):
-        return self.visitChildren(ctx)
+        args = self.visitList(ctx.list_())
+        body = ctx.expr()
+        return tp.Lambda(args, body)
 
 
     # Visit a parse tree produced by LanguageParser#val.
@@ -74,12 +76,11 @@ class Visitor(LanguageVisitor):
     # Visit a parse tree produced by LanguageParser#list.
     def visitList(self, ctx:LanguageParser.ListContext):
         result = []
-        n = ctx.getChildCount()
-        for i in range(1,n-1,2):
+        for item in ctx.item():
             if not self.shouldVisitNextChild(ctx, result):
                 return result
 
-            c = ctx.getChild(i)
+            c = item
             child_result = c.accept(self)
             result.append(child_result)
         return result

@@ -43,7 +43,7 @@ val: integer | string | edge | list | graph;
 string: STRING_LITERAL;
 integer: DIGIT+;
 edge: LP integer COMMA string COMMA integer RP;
-item: string | integer | edge | var;
+item: string | integer | edge | var | list;
 list: LB RB | LB item (COMMA item)* RB;
 graph: LP list COMMA list RP;
 

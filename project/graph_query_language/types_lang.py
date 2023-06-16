@@ -86,3 +86,17 @@ class Bool:
     
     def __str__(self) -> str:
         return "true" if self.value else "false"
+
+class Lambda:
+    def __init__(self, args, body) -> None:
+        self.args = args
+        self.body = body
+
+    def __str__(self) -> str:
+        lam = 'lambda: {'
+        for x in self.args:
+            lam += x.value + ', '
+        if len(self.args) != 0:
+            lam = lam[:-2]
+        lam += '} -> body'
+        return lam
