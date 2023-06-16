@@ -5,9 +5,9 @@ from antlr4.tree.Tree import TerminalNodeImpl
 
 from pydot import Dot, Edge, Node
 
-from project.graph_query_language.language.LanguageLexer import LanguageLexer
-from project.graph_query_language.language.LanguageParser import LanguageParser
-from project.graph_query_language.language.LanguageListener import LanguageListener
+from language.LanguageLexer import LanguageLexer
+from language.LanguageParser import LanguageParser
+from language.LanguageListener import LanguageListener
 
 
 def build_parser(text: str) -> LanguageParser:

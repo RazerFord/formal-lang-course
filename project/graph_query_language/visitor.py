@@ -46,11 +46,6 @@ class Visitor(LanguageVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LanguageParser#bool.
-    def visitBool(self, ctx:LanguageParser.BoolContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LanguageParser#string.
     def visitString(self, ctx:LanguageParser.StringContext):
         return str(ctx.getText())
@@ -97,6 +92,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#id.
     def visitId(self, ctx:LanguageParser.IdContext):
+        if ctx.getText() == "true":
+            return tp.Bool(True)
+        if ctx.getText() == "false":
+            return tp.Bool(False)
         return tp.Id(ctx.getText(), self.memory)
 
 

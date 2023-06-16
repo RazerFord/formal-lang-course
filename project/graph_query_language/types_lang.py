@@ -40,3 +40,10 @@ class Graph:
     
     def __str__(self) -> str:
         return self.gr.__str__()
+
+class Bool:
+    def __init__(self, value) -> None:
+        self.value = value
+    
+    def __str__(self) -> str:
+        return "true" if self.value else "false"
