@@ -34,7 +34,7 @@ class String:
 class Graph:
     def __init__(self, vertexes = None, edges = None, graph = None, start_nodes = None, final_nodes = None) -> None:
         self.gr = nx.MultiDiGraph()
-        if graph is None and vertexes is not None and edge is not None:
+        if graph is None and vertexes is not None and edges is not None:
             self.gr.add_nodes_from(vertexes)
             for edge in edges:
                 self.gr.add_edge(edge.fst, edge.snd, label=edge.label.replace("\"", ''))
@@ -89,6 +89,20 @@ class Graph:
             for label in l.values():
                 result.add(label); 
         return list(result)
+    
+    def normilize(self):
+        index = 0
+        node_to_index = {}
+        for node in self.gr.nodes:
+            node_to_index[node] = index
+            index += 1
+        edges = []
+        for u, l, v in self.get_edges():
+            edges.append(Edge(node_to_index[u], l, node_to_index[v]))
+        nodes = [node_to_index[x] for x in self.gr.nodes]
+        start_nodes = [node_to_index[x] for x in self.start_nodes]
+        final_nodes = [node_to_index[x] for x in self.final_nodes]
+        return Graph(vertexes=nodes, edges=edges, start_nodes=start_nodes, final_nodes=final_nodes)
 
 
 class Bool:

@@ -18,6 +18,10 @@ import networkx as nx
 class Visitor(LanguageVisitor):
     memory : Memory = Memory()
 
+    def __init__(self):
+        self.memory[tp.Id('true', self.memory)] = tp.Bool('true')
+        self.memory[tp.Id('false', self.memory)] = tp.Bool('false')
+
     # Visit a parse tree produced by LanguageParser#program.
     def visitProgram(self, ctx:LanguageParser.ProgramContext):
         return self.visitChildren(ctx)
@@ -279,12 +283,26 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#kleene.
     def visitKleene(self, ctx:LanguageParser.KleeneContext):
-        return self.visitChildren(ctx)
+        graph_l = self._get_graph_by_target(ctx.binary_l())
+        enfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize().to_regex()
+        enfa = enfa_l.kleene_star().to_epsilon_nfa().minimize()
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
 
 
     # Visit a parse tree produced by LanguageParser#equal.
     def visitEqual(self, ctx:LanguageParser.EqualContext):
-        return self.visitChildren(ctx)
+        binary_l = self._get_binary_equal(ctx.binary_equal_l())
+        binary_r = self._get_binary_equal(ctx.binary_equal_r())
+        return tp.Bool(binary_l.__class__ == binary_r.__class__ and binary_l == binary_r)
+
+
+    # Visit a parse tree produced by LanguageParser#normilize.
+    def visitNormilize(self, ctx:LanguageParser.NormilizeContext):
+        graph = self._get_graph_by_target(ctx.target())
+        return graph.normilize()
+
 
     def _get_lambda(self, ctx:LanguageParser.MapContext) -> tp.Lambda:
         if ctx.lambda_() is not None:
@@ -315,6 +333,12 @@ class Visitor(LanguageVisitor):
         if ctx.edge() is not None:
             edge = self.visitEdge(ctx.edge())
             return (edge.fst, edge.label.replace('"', ''), edge.snd)
+
+    def _get_binary_equal(self, ctx:LanguageParser.Binary_equal_lContext):
+        if ctx.var() is not None:
+            return self.memory.get(ctx.var().getText())
+        if ctx.val() is not None:
+            return self.visitVal(ctx.val())
 
     def _get_source(self, ctx: Union[
         LanguageParser.Set_startContext, 

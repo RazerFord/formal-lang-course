@@ -15,6 +15,7 @@ expr:
 	| var
 	| val
 	| lambda
+	| normilize
 	| set_start
 	| set_final
 	| add_start
@@ -32,8 +33,8 @@ expr:
 	| concat
 	| union
 	| in
-	| expr kleene
-	| expr equal expr;
+	| kleene
+	| equal;
 
 lambda: LP LAMBDA_DEF list ARROW expr RP;
 
@@ -51,6 +52,7 @@ id: (CHAR (CHAR | DIGIT)*);
 CHAR: [a-zA-Z_];
 DIGIT: [0-9];
 
+normilize: 'normilize' target;
 set_start: 'set_start' of source to target;
 set_final: 'set_final' of source to target;
 add_start: 'add_start' of source to target;
@@ -79,10 +81,12 @@ concat: binary_l '.' binary_r;
 union: binary_l '|' binary_r;
 in: binary_in_l 'in' binary_r;
 kleene: binary_l '*';
-equal: expr '=' expr;
+equal: binary_equal_l '=' binary_equal_r;
 binary_l: graph | var;
 binary_r: graph | var;
 binary_in_l: var | integer | string | edge;
+binary_equal_l: var | val;
+binary_equal_r: var | val;
 
 COMMA: ',';
 QUOT: '"';
