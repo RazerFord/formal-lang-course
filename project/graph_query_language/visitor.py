@@ -223,7 +223,8 @@ class Visitor(LanguageVisitor):
                 raise InvalidArgument("the number of arguments and the number of parameters in the lambda are not the same")
             for n, v in zip(lam.args, _iter):
                 self.memory[n] = v
-            if self.memory[self.visitExpr(lam.body)].value == True:
+            val = self.visitExpr(lam.body)
+            if val.value or (isinstance(val, tp.Id) and self.memory[self.visitExpr(lam.body)].value):
                 result.append(args)
         return result
 

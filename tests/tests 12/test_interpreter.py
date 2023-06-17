@@ -154,6 +154,21 @@ class TestInterpreter:
         assert "[5, 7, 9, 10, 46, 47, 49]" in ans
 
 
+    def test_filter(self):
+        out = Output()
+        out.acquire()
+        interpreter('''fil := (lambda {z} -> "a" in z);
+        get := (lambda {z} -> get_labels of z);
+        g1 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
+        g2 := ({5, 7, 9, 10}, {(5, "z", 7), (9, "c", 10)});
+        list := {g1, g2};
+        list := filter fil : list;
+        print map get : list;''')
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert 'a' in ans
+
+
     def test_load(self):
         out = Output()
         out.acquire()
