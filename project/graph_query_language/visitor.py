@@ -248,8 +248,8 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#concat.
     def visitConcat(self, ctx:LanguageParser.ConcatContext):
-        item_l = self._get_graph_by_target(ctx.binary_l())
-        item_r = self._get_graph_by_target(ctx.binary_r())
+        item_l = self._get_by_binary(ctx.binary_l())
+        item_r = self._get_by_binary(ctx.binary_r())
         return item_l.concat(item_r)
 
 
@@ -269,7 +269,7 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#kleene.
     def visitKleene(self, ctx:LanguageParser.KleeneContext):
-        item = self._get_graph_by_target(ctx.binary_l())
+        item = self._get_by_binary(ctx.binary_l())
         return item.kleene()
 
     # Visit a parse tree produced by LanguageParser#equal.
@@ -357,7 +357,7 @@ class Visitor(LanguageVisitor):
     def _get_graph_by_target(self, target):
         if target.var() is not None:
             name = target.var().getText()
-            graph = self._get_graph_recursively(self.memory.get(name))
+            graph = self._get_recursively(self.memory.get(name))
             if isinstance(graph, tp.Graph):
                 return graph
             raise InvalidArgument(f"target argument '{name}' is not a Graph")
@@ -366,21 +366,25 @@ class Visitor(LanguageVisitor):
         raise InvalidArgument(f"{target.getText()} not a valid argument")
 
 
-    def _get_graph_recursively(self, key):
-        if not isinstance(key, tp.Id):
-            return key
-        key = self.memory[key]
-        return self._get_graph_recursively(key)
-
-
     def _get_by_binary(self, target):
+        if target.string() is not None:
+            return tp.Regex(regex_str=target.string().getText())
         if target.var() is not None:
             name = target.var().getText()
             var = self.memory.get(name)
-            if isinstance(var, tp.Graph) or isinstance(var, tp.Bool):
+            var = self._get_recursively(var)
+            if isinstance(var, str):
+                return tp.Regex(regex_str=var)
+            if isinstance(var, tp.Graph) or isinstance(var, tp.Bool) or isinstance(var, tp.Regex):
                 return var
-            raise InvalidArgument(f"target argument '{name}' is not a Graph or Bool")
+            raise InvalidArgument(f"target argument '{name}' is not a Graph, Bool or Regex")
         if target.graph() is not None:
             return self.visitGraph(target.graph())
         raise InvalidArgument(f"{target.getText()} not a valid argument")
 
+
+    def _get_recursively(self, key):
+        if not isinstance(key, tp.Id):
+            return key
+        key = self.memory[key]
+        return self._get_recursively(key)

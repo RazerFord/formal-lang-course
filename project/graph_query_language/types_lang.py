@@ -1,6 +1,9 @@
 from project.graph_query_language.exceptions import InvalidArgument
 from pyformlang.finite_automaton import EpsilonNFA
+from pyformlang import regular_expression as re
+from typing import Union
 import networkx as nx
+
 
 # import sys
 # sys.path.append('..')
@@ -106,29 +109,41 @@ class Graph:
                 result.add(label); 
         return list(result)
     
-    def intersect(self, graph: 'Graph') -> 'Graph':
-        if type(self) != type(graph):
-            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
-        endfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes)
-        endfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes)
-        enfa = get_intersection_two_finite_automata(endfa_l, endfa_r)
+    def intersect(self, entity: Union['Graph', 'Regex']) -> 'Graph':
+        enfa_r = None
+        if isinstance(entity, Graph):
+            enfa_r = create_non_deterministic_automaton_from_graph(entity.gr, entity.start_nodes, entity.final_nodes)
+        if isinstance(entity, Regex):
+            enfa_r = entity.rgx.to_epsilon_nfa().minimize()
+        if enfa_r is None:
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(entity)} or {type(entity)} != regex")
+        enfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes)
+        enfa = get_intersection_two_finite_automata(enfa_l, enfa_r)
         return create_graph_from_enfa(enfa)
 
 
-    def concat(self, graph: 'Graph') -> 'Graph':
-        if type(self) != type(graph):
-            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
+    def concat(self, entity: Union['Graph', 'Regex']) -> 'Graph':
+        regex_r = None
+        if isinstance(entity, Graph):
+            regex_r = create_non_deterministic_automaton_from_graph(entity.gr, entity.start_nodes, entity.final_nodes).minimize().to_regex()
+        if isinstance(entity, Regex):
+            regex_r = entity.rgx
+        if regex_r is None:
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(entity)} or {type(entity)} != regex")
         regex_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize().to_regex()
-        regex_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize().to_regex()
         enfa = regex_l.concatenate(regex_r).to_epsilon_nfa().minimize()
         return create_graph_from_enfa(enfa)
 
 
-    def union(self, graph: 'Graph') -> 'Graph':
-        if type(self) != type(graph):
-            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
+    def union(self, entity: Union['Graph', 'Regex']) -> 'Graph':
+        enfa_r = None
+        if isinstance(entity, Graph):
+            enfa_r = create_non_deterministic_automaton_from_graph(entity.gr, entity.start_nodes, entity.final_nodes).minimize()
+        if isinstance(entity, Regex):
+            enfa_r = entity.rgx.to_epsilon_nfa().minimize()
+        if enfa_r is None:
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(entity)} or {type(entity)} != regex")
         enfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize()
-        enfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize()
         enfa = enfa_l.union(enfa_r).minimize()
         return create_graph_from_enfa(enfa)
 
@@ -161,6 +176,39 @@ class Graph:
 
     def __eq__(self, graph: object) -> bool:
         return self.get_edges() == graph.get_edges()
+
+
+class Regex:
+    def __init__(self, regex_str: str ='', regex:'Regex' = None) -> None:
+        if regex is None:
+            regex_str = regex_str.replace('"','')
+            regex = re.Regex(regex_str)
+        self.rgx = regex
+
+
+    def __str__(self) -> str:
+        return self.rgx.__str__()
+
+
+    def concat(self, regex: 'Regex') -> 'Regex':
+        if type(self) != type(regex):
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(regex)}")
+        return Regex(regex=self.rgx.concatenate(regex.rgx))
+
+
+    def union(self, regex: 'Regex') -> 'Regex':
+        if type(self) != type(regex):
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(regex)}")
+        self.rgx.union(regex.rgx)
+        return Regex(regex=self.rgx.union(regex.rgx))
+
+
+    def kleene(self) -> 'Regex':
+        return Regex(regex=self.rgx.kleene_star())
+
+
+    def __eq__(self, regex: 'Regex') -> bool:
+        return self.rgx == regex.rgx
 
 
 class Bool:
