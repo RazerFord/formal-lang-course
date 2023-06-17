@@ -243,8 +243,6 @@ class Visitor(LanguageVisitor):
     def visitIntersect(self, ctx:LanguageParser.IntersectContext):
         item_l = self._get_by_binary(ctx.binary_l())
         item_r = self._get_by_binary(ctx.binary_r())
-        if type(item_l) != type(item_r):
-            raise InvalidArgument(f"arguments of different types: {type(item_l)} != {type(item_r)}")
         return item_l.intersect(item_r)
 
 
@@ -259,8 +257,6 @@ class Visitor(LanguageVisitor):
     def visitUnion(self, ctx:LanguageParser.UnionContext):
         item_l = self._get_by_binary(ctx.binary_l())
         item_r = self._get_by_binary(ctx.binary_r())
-        if type(item_l) != type(item_r):
-            raise InvalidArgument(f"arguments of different types: {type(item_l)} != {type(item_r)}")
         return item_l.union(item_r)
 
 
@@ -273,13 +269,8 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#kleene.
     def visitKleene(self, ctx:LanguageParser.KleeneContext):
-        graph_l = self._get_graph_by_target(ctx.binary_l())
-        enfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize().to_regex()
-        enfa = enfa_l.kleene_star().to_epsilon_nfa().minimize()
-        start_nodes = [x.value for x in enfa.start_states]
-        final_nodes = [x.value for x in enfa.final_states]
-        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
-
+        item = self._get_graph_by_target(ctx.binary_l())
+        return item.kleene()
 
     # Visit a parse tree produced by LanguageParser#equal.
     def visitEqual(self, ctx:LanguageParser.EqualContext):

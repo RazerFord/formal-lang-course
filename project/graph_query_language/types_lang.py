@@ -107,6 +107,8 @@ class Graph:
         return list(result)
     
     def intersect(self, graph: 'Graph') -> 'Graph':
+        if type(self) != type(graph):
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
         endfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes)
         endfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes)
         enfa = get_intersection_two_finite_automata(endfa_l, endfa_r)
@@ -114,6 +116,8 @@ class Graph:
 
 
     def concat(self, graph: 'Graph') -> 'Graph':
+        if type(self) != type(graph):
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
         regex_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize().to_regex()
         regex_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize().to_regex()
         enfa = regex_l.concatenate(regex_r).to_epsilon_nfa().minimize()
@@ -121,6 +125,8 @@ class Graph:
 
 
     def union(self, graph: 'Graph') -> 'Graph':
+        if type(self) != type(graph):
+            raise InvalidArgument(f"arguments of different types: {type(self)} != {type(graph)}")
         enfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize()
         enfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize()
         enfa = enfa_l.union(enfa_r).minimize()
@@ -130,6 +136,12 @@ class Graph:
     def inop(self, elem) -> 'Bool':
         res = elem in self.get_vertices() or elem in self.get_labels() or elem in self.get_edges()
         return Bool(res)
+
+
+    def kleene(self) -> 'Graph':
+        enfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize().to_regex()
+        enfa = enfa_l.kleene_star().to_epsilon_nfa().minimize()
+        return create_graph_from_enfa(enfa)
 
 
     def normilize(self):
