@@ -4,6 +4,9 @@
   - [Описание конкретного синтаксиса языка](#описание-конкретного-синтаксиса-языка)
   - [Пример](#пример)
   - [Генерация парсера](#генерация-парсера)
+  - [Система типов](#система-типов)
+  - [Используемые алгоритмы](#используемые-алгоритмы)
+  - [Запуск](#запуск)
 
 
 ## Описание абстрактного синтаксиса языка
@@ -67,33 +70,33 @@ Int: DIGIT+
 Vertex: INT
 Edge: LP INT COMMA STRING COMMA INT RP
 Graph: LP LIST COMMA LIST RP
-Bool: BOOL
 
 
 expr: LP expr RP
     | var
     | val
-    | SET_START OF (LIST | expr) TO expr
-    | SET_FINAL OF (LIST | expr) TO expr
-    | ADD_START OF (LIST | expr) TO expr
-    | ADD_FINAL OF (LIST | expr) TO expr
-    | GET_START OF expr
-    | GET_FINAL OF expr
-    | GET_REACHABLE OF expr
-    | GET_VERTICES OF expr
-    | GET_EDGES OF expr
-    | GET_LABELS OF expr
-    | MAP lambda expr
-    | FILTER lambda expr
+    | SET_START OF (var | INT | LIST) TO (var | Graph)
+    | SET_FINAL OF (var | INT | LIST) TO (var | Graph)
+    | ADD_START OF (var | INT | LIST) TO (var | Graph)
+    | ADD_FINAL OF (var | INT | LIST) TO (var | Graph)
+    | GET_START OF (var | Graph)
+    | GET_FINAL OF (var | Graph)
+    | GET_REACHABLE OF (var | Graph)
+    | GET_VERTICES OF (var | Graph)
+    | GET_EDGES OF (var | Graph)
+    | GET_LABELS OF (var | Graph)
+    | MAP lambda (var | LIST)
+    | FILTER lambda (var | LIST)
     | LOAD STRING
-    | expr INTERSECT expr
-    | expr CONCAT expr
-    | expr UNION expr
-    | expr IN expr
-    | expr KLEENE
-    | expr EQUAL expr
+    | (var | Graph | STRING) INTERSECT (var | Graph | STRING)
+    | (var | Graph | STRING) CONCAT (var | Graph | STRING)
+    | (var | Graph | STRING) UNION (var | Graph | STRING)
+    | (var | INT | STRING | Edge) IN (var | Graph | STRING)
+    | (var | Graph | STRING) KLEENE
+    | (var | val) EQUAL (var | val)
 
 lambda: LP LAMBDA LIST ARROW expr RP
+val: INT | STRING | LIST | Edge | Graph;
 
 COMMA: ','
 ASSIGN: ':='
@@ -144,27 +147,27 @@ COMMENT: '//'
 
 ```Go
 // Загрузить граф из файла
-g := load "./test/graph"
+g := load "./test/graph";
 
-// Создать переменную типа Int
-start := 1
+// Создать переменную
+start := 1;
 
 // Установаить стартовую вершину start в графе g
-ng := set_start of start to g
+ng := set_start of start to g;
 
 // Инициализировать лист
-list := {1, 2, 3}
+list := {1, 2, 3};
 
 // Установить финальные вершины в графе
-nng := set_final of list tp ng
+nng := set_final of list tp ng;
 
 // Получить достижимые вершины
-vs := get_reachable nng
+vs := get_reachable nng;
 
 // Отфильтровать вершины
-vsf := filter (lambda { v } -> v = start) vs
+vsf := filter (lambda { v } -> v = start) vs;
 
-print vsf
+print vsf;
 ```
 
 ## Генерация парсера
@@ -181,4 +184,54 @@ pip install -r requirements.txt
 
 ```shell
 antlr4 -Dlanguage=Python3 -visitor Language.g4 -o language
+```
+
+## Система типов
+
+Достыпные типы перечислены в таблице.
+
+| Тип 	   | Краткое описание       |
+|----------|------------------------|
+| Edge     | Ребро графа            |
+| String   | Строка                 |
+| Graph    | Граф                   |
+| Regex    | Регулярное выражение   |
+| Bool     | Логический тип         |
+| Lambda   | Lambda функция         |
+| int      | Целое число            |
+
+Тип `Regex` явно задать нельзя. `String` автоматически приводится к типу `Regex`, если к нему применить одну из операций `&`  `•`  `|`  `•`  `.`, при этом сама переменная типа `String` может быть как левым, так правым операндом. Доступны следующие вариации:
+
+> `String op String`
+
+> `Regex op Regex`
+
+> `Graph op Regex`
+
+> `Graph op String`
+
+где `op` - `&`  `•`  `|`  `•`  `.`
+
+Система типов устроена так, что если инициализировать переменную одним типом, то ей нельзя присвоить значения другого типа.
+
+## Используемые алгоритмы
+
+Для операции `Graph & Regex` используется алгоритм пересечения конечных автоматов, реализованный в домашней работе.
+
+Для остальных операций используются алгоритмы из библиотеки `pyformlang`.
+
+## Запуск
+
+Файл с программой должен иметь расширение `lng`.
+
+Пример программы.
+
+`test.lng`:
+```Go
+print "Hello world";
+```
+Чтобы запустить программу в консоли необходимо выполнить:
+
+```Shell
+python -m project.graph_query_language test.lng
 ```

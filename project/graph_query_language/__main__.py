@@ -1,10 +1,10 @@
 import sys
-from exceptions import ScriptNotFound
-from exceptions import WrongNumberArguments
-from exceptions import InvalidArgument
-from interpreter import interpreter
+from project.graph_query_language.exceptions import ScriptNotFound
+from project.graph_query_language.exceptions import WrongNumberArguments
+from project.graph_query_language.exceptions import InvalidArgument
+from project.graph_query_language.interpreter import interpreter
+from project.graph_query_language.utils import print_err
 from pathlib import Path
-from utils import print_err
 
 
 def read_file(file: Path) -> str:
