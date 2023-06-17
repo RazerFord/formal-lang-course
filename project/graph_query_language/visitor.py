@@ -309,6 +309,8 @@ class Visitor(LanguageVisitor):
             return self.visitLambda(ctx.lambda_())
         if ctx.var() is not None:
             return self.memory.get(ctx.var().getText())
+        raise InvalidArgument(f"{ctx.getText()} not a valid argument")
+        
 
     def _get_iterable(self, ctx:LanguageParser.MapContext) -> tp.Lambda:
         iterable = ctx.iterable()
@@ -316,12 +318,16 @@ class Visitor(LanguageVisitor):
             return self.visitList(iterable.list_())
         if iterable.var() is not None:
             return self.memory.get(iterable.var().getText())
+        raise InvalidArgument(f"{ctx.getText()} not a valid argument")
+
 
     def _get_filename(self, ctx:LanguageParser.LoadContext)->str:
         if ctx.string() is not None:
             return ctx.string()
         if ctx.var() is not None:
             return self.memory.get(ctx.var().getText())
+        raise InvalidArgument(f"{ctx.getText()} not a valid argument")
+        
 
     def _get_binary_in_l(self, ctx:LanguageParser.Binary_in_lContext):
         if ctx.var() is not None:
@@ -333,12 +339,16 @@ class Visitor(LanguageVisitor):
         if ctx.edge() is not None:
             edge = self.visitEdge(ctx.edge())
             return (edge.fst, edge.label.replace('"', ''), edge.snd)
+        raise InvalidArgument(f"{ctx.getText()} not a valid argument")
+        
 
     def _get_binary_equal(self, ctx:LanguageParser.Binary_equal_lContext):
         if ctx.var() is not None:
             return self.memory.get(ctx.var().getText())
         if ctx.val() is not None:
             return self.visitVal(ctx.val())
+        raise InvalidArgument(f"{ctx.getText()} not a valid argument")
+        
 
     def _get_source(self, ctx: Union[
         LanguageParser.Set_startContext, 
@@ -352,6 +362,8 @@ class Visitor(LanguageVisitor):
             return [int(source.integer())]
         if source.list_() is not None:
             return self.visitList(source.list_())
+        raise InvalidArgument(f"{source.getText()} not a valid argument")
+        
 
     def _get_target_graph(self, ctx: Union[
         LanguageParser.Set_startContext, 
@@ -370,3 +382,4 @@ class Visitor(LanguageVisitor):
             raise InvalidArgument(f"target argument '{name}' is not a graph")
         if target.graph() is not None:
             return self.visitGraph(target.graph())
+        raise InvalidArgument(f"{target.getText()} not a valid argument")
