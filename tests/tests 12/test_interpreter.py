@@ -164,7 +164,14 @@ class TestInterpreter:
         out.release()
         ans = read_file(Path(FILENAME))
         assert "(3, 'a', 4)" in ans and "(4, 'c', 6)" in ans and "(4, 'a', 1)" in ans and "(1, 'c', 0)" in ans
-
+        out.acquire()
+        interpreter('''
+        g := load "skos";
+        print get_edges of g;
+        ''')
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert len(ans) > 300
 
     # def test_bind_fail(self):
     #     out = Output()
