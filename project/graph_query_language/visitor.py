@@ -4,9 +4,13 @@ from memory import Memory
 from typing import Union
 from exceptions import InvalidArgument
 from pathlib import Path
-# from ..graph_info import get_graph_by_name
 
-import cfpq_data
+import sys
+sys.path.append('..')
+from finite_automata import create_non_deterministic_automaton_from_graph
+from graph_info import get_graph_by_name
+from intersection_finite_automata import get_intersection_two_finite_automata
+
 import types_lang as tp
 import networkx as nx
 
@@ -196,11 +200,9 @@ class Visitor(LanguageVisitor):
         path = Path(filename)
         graph = None
         if path.is_file():
-            graph=nx.read_edgelist(filename)
+            graph=nx.read_edgelist(filename, nodetype=int)
         else:
-            graph_path = cfpq_data.download(filename)
-            graph= cfpq_data.graph_from_csv(graph_path)
-            # graph=get_graph_by_name(filename)
+            graph=get_graph_by_name(filename)
         return tp.Graph(graph=graph)
 
 
@@ -234,22 +236,45 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#intersect.
     def visitIntersect(self, ctx:LanguageParser.IntersectContext):
-        return self.visitChildren(ctx)
+        graph_l = self._get_graph_by_target(ctx.binary_l())
+        graph_r = self._get_graph_by_target(ctx.binary_r())
+        endfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes)
+        endfa_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes)
+        enfa = get_intersection_two_finite_automata(endfa_l, endfa_r)
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
 
 
     # Visit a parse tree produced by LanguageParser#concat.
     def visitConcat(self, ctx:LanguageParser.ConcatContext):
-        return self.visitChildren(ctx)
+        graph_l = self._get_graph_by_target(ctx.binary_l())
+        graph_r = self._get_graph_by_target(ctx.binary_r())
+        regex_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize().to_regex()
+        regex_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes).minimize().to_regex()
+        enfa = regex_l.concatenate(regex_r).to_epsilon_nfa().minimize()
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
 
 
     # Visit a parse tree produced by LanguageParser#union.
     def visitUnion(self, ctx:LanguageParser.UnionContext):
-        return self.visitChildren(ctx)
-
+        graph_l = self._get_graph_by_target(ctx.binary_l())
+        graph_r = self._get_graph_by_target(ctx.binary_r())
+        enfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize()
+        enfa_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes).minimize()
+        enfa = enfa_l.union(enfa_r).minimize()
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
 
     # Visit a parse tree produced by LanguageParser#in.
     def visitIn(self, ctx:LanguageParser.InContext):
-        return self.visitChildren(ctx)
+        binary_l = self._get_binary_in_l(ctx.binary_in_l())
+        binary_r = self._get_graph_by_target(ctx.binary_r())
+        res = binary_l in binary_r.get_vertices() or binary_l in binary_r.get_labels() or binary_l in binary_r.get_edges()
+        return tp.Bool(res)
 
 
     # Visit a parse tree produced by LanguageParser#kleene.
@@ -280,6 +305,17 @@ class Visitor(LanguageVisitor):
         if ctx.var() is not None:
             return self.memory.get(ctx.var().getText())
 
+    def _get_binary_in_l(self, ctx:LanguageParser.Binary_in_lContext):
+        if ctx.var() is not None:
+            return self.memory.get(ctx.var().getText())
+        if ctx.integer() is not None:
+            return self.visitInteger(ctx.integer())
+        if ctx.string() is not None:
+            return self.visitString(ctx.string()).replace('"', '')
+        if ctx.edge() is not None:
+            edge = self.visitEdge(ctx.edge())
+            return (edge.fst, edge.label.replace('"', ''), edge.snd)
+
     def _get_source(self, ctx: Union[
         LanguageParser.Set_startContext, 
         LanguageParser.Set_finalContext,
@@ -299,6 +335,9 @@ class Visitor(LanguageVisitor):
         LanguageParser.Add_startContext,
         LanguageParser.Add_finalContext]):
         target = ctx.target()
+        return self._get_graph_by_target(target)
+
+    def _get_graph_by_target(self, target):
         if target.var() is not None:
             name = target.var().getText()
             graph = self.memory.get(name)

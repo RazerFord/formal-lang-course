@@ -32,17 +32,20 @@ class String:
         return self.value
     
 class Graph:
-    def __init__(self, vertexes = None, edges = None, graph = None) -> None:
-        self.gr = None
-        if graph is None:
-            self.gr = nx.MultiDiGraph()
+    def __init__(self, vertexes = None, edges = None, graph = None, start_nodes = None, final_nodes = None) -> None:
+        self.gr = nx.MultiDiGraph()
+        if graph is None and vertexes is not None and edge is not None:
             self.gr.add_nodes_from(vertexes)
             for edge in edges:
                 self.gr.add_edge(edge.fst, edge.snd, label=edge.label.replace("\"", ''))
         else:
             self.gr = nx.MultiDiGraph(graph)
-        self.start_nodes = list(self.gr.nodes)
-        self.final_nodes = list(self.gr.nodes)
+        if start_nodes is None:
+            start_nodes = list(self.gr.nodes)
+        self.start_nodes = start_nodes
+        if final_nodes is None:
+            final_nodes = list(self.gr.nodes)
+        self.final_nodes = final_nodes
     
     def __str__(self) -> str:
         return self.gr.__str__()
@@ -64,7 +67,11 @@ class Graph:
         self.final_nodes += nodes
 
     def get_reachable(self):
-        return list(nx.transitive_closure(nx.DiGraph(self.gr)).edges())
+        result = []
+        for s, t  in nx.transitive_closure(nx.DiGraph(self.gr)).edges():
+            if s in self.start_nodes and t in self.final_nodes:
+                result.append((s, t));
+        return result
     
     def get_vertices(self):
         return list(self.gr.nodes)

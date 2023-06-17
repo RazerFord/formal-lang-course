@@ -28,10 +28,10 @@ expr:
 	| map
 	| filter
 	| load
-	| expr intersect expr
-	| expr concat expr
-	| expr union expr
-	| expr in expr
+	| intersect
+	| concat
+	| union
+	| in
 	| expr kleene
 	| expr equal expr;
 
@@ -74,12 +74,16 @@ load: 'load' (string | var);
 ARROW: '->';
 of: 'of';
 to: 'to';
-intersect: '&';
-concat: '.';
-union: '|';
-in: 'in';
-kleene: '*';
-equal: '=';
+intersect: binary_l '&' binary_r;
+concat: binary_l '.' binary_r;
+union: binary_l '|' binary_r;
+in: binary_in_l 'in' binary_r;
+kleene: binary_l '*';
+equal: expr '=' expr;
+binary_l: graph | var;
+binary_r: graph | var;
+binary_in_l: var | integer | string | edge;
+
 COMMA: ',';
 QUOT: '"';
 LP: '(';
