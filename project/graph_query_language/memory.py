@@ -11,7 +11,7 @@ class Memory:
     def __setitem__(self, key : Id , value):
         if key.value in self.box and type(value) is not type(self.box[key.value]):
             if type(self.box[key.value]) is Id:
-                self[key]
+                self[self.box[key.value]] = value
                 return
             raise InvalidArgument(f"assigning a declared variable an argument of a different type: {type(value)}, {type(self.box[key.value])}")
         self.box[key.value] = value

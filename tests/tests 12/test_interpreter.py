@@ -119,6 +119,23 @@ class TestInterpreter:
         assert "[46, 47, 49]" in ans
 
 
+    def test_map_add(self):
+        out = Output()
+        out.acquire()
+        prog = self.prog_setter('get_start', 'add_start', '46, 47, 49')
+        interpreter(prog)
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[1, 2, 3, 4, 46, 47, 49]" in ans
+        assert "[5, 7, 9, 10, 46, 47, 49]" in ans
+        out.acquire()
+        prog = self.prog_setter('get_final', 'add_final', '46, 47, 49')
+        interpreter(prog)
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[1, 2, 3, 4, 46, 47, 49]" in ans
+        assert "[5, 7, 9, 10, 46, 47, 49]" in ans
+
 
     # def test_bind_fail(self):
     #     out = Output()
@@ -139,9 +156,9 @@ class TestInterpreter:
         print map strt : list;
         '''
     
-    def prog_setter(self, get:str,set:str, vertexes: str) -> str:
+    def prog_setter(self, get:str,cmd:str, vertexes: str) -> str:
         return '''get := (lambda {z} -> '''+get+''' of z);
-        set := (lambda {z} -> '''+set+''' of {'''+vertexes+'''} to z);
+        set := (lambda {z} -> '''+cmd+''' of {'''+vertexes+'''} to z);
         g1 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
         g2 := ({5, 7, 9, 10}, {(5, "a", 7), (9, "c", 10)});
         list := {g1, g2};
