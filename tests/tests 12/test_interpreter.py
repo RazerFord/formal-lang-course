@@ -85,17 +85,39 @@ class TestInterpreter:
         assert "[1, 2, 3, 2]" in ans
         assert "[2, 3, 2, 1]" in ans
 
-    def test_map_fst_snd(self):
+    def test_map_get(self):
         out = Output()
         out.acquire()
-        interpreter('''
-        fst := (lambda {z} -> get_start of z);
-        g1 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
-        g2 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
-        list := {g1, g2};
-        print map fst : {g1};
-        ''')
+        prog = self.prog_getter('get_start')
+        interpreter(prog)
         out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[1, 2, 3, 4]" in ans
+        assert "[5, 7, 9, 10]" in ans
+        out.acquire()
+        prog = self.prog_getter('get_final')
+        interpreter(prog)
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[1, 2, 3, 4]" in ans
+        assert "[5, 7, 9, 10]" in ans
+
+
+    def test_map_set(self):
+        out = Output()
+        out.acquire()
+        prog = self.prog_setter('get_start', 'set_start', '46, 47, 49')
+        interpreter(prog)
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[46, 47, 49]" in ans
+        out.acquire()
+        prog = self.prog_setter('get_final', 'set_final', '46, 47, 49')
+        interpreter(prog)
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "[46, 47, 49]" in ans
+
 
 
     # def test_bind_fail(self):
@@ -108,3 +130,21 @@ class TestInterpreter:
     #     out.release()
     #     ans = read_file(Path(FILENAME))
     #     assert "assigning a declared variable an argument of a different type" in ans
+
+    def prog_getter(self, cmd:str) -> str:
+        return '''strt := (lambda {z} -> '''+cmd+''' of z);
+        g1 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
+        g2 := ({5, 7, 9, 10}, {(5, "a", 7), (9, "c", 10)});
+        list := {g1, g2};
+        print map strt : list;
+        '''
+    
+    def prog_setter(self, get:str,set:str, vertexes: str) -> str:
+        return '''get := (lambda {z} -> '''+get+''' of z);
+        set := (lambda {z} -> '''+set+''' of {'''+vertexes+'''} to z);
+        g1 := ({1, 2, 3, 4}, {(1, "a", 2), (3, "c", 4)});
+        g2 := ({5, 7, 9, 10}, {(5, "a", 7), (9, "c", 10)});
+        list := {g1, g2};
+        list := map set : list;
+        print map get : list;
+        '''

@@ -193,7 +193,8 @@ class Visitor(LanguageVisitor):
                 raise InvalidArgument("the number of arguments and the number of parameters in the lambda are not the same")
             for n, v in zip(lam.args, args):
                 self.memory[n] = v
-            result.append(self.memory[self.visitExpr(lam.body)])
+            val = self.visitExpr(lam.body)
+            result.append(self.memory[val] if isinstance(val, tp.Id) else val)
         return result
 
 
@@ -374,10 +375,10 @@ class Visitor(LanguageVisitor):
 
 
     def _get_graph_recursively(self, key):
-        # if not isinstance(key, tp.Id):
-        return key
-        # key = self.memory[key]
-        # return self._get_graph_recursively(key)
+        if not isinstance(key, tp.Id):
+            return key
+        key = self.memory[key]
+        return self._get_graph_recursively(key)
 
 
     def _get_by_binary(self, target):
