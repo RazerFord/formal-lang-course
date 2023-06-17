@@ -7,9 +7,10 @@ from pathlib import Path
 from utils import print_err
 
 
-def read_file(file: Path)-> str:
+def read_file(file: Path) -> str:
     text = file.open()
     return "".join(text.readlines())
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

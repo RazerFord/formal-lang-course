@@ -67,11 +67,11 @@ class TestLanguage:
         assert not check_input("g := g1 in := 2;")
 
     def test_commbine(self):
-        assert check_input('g := (filter (lambda {x, y} -> true) : {graph1, graph2});')
+        assert check_input("g := (filter (lambda {x, y} -> true) : {graph1, graph2});")
         assert check_input(
-            '''g1 := (map (lambda {x, y} -> x) : {graph});
+            """g1 := (map (lambda {x, y} -> x) : {graph});
                g2 := (filter (lambda {x, y} -> false) : {graph1, graph2});
-               g := g1 & g2;'''
+               g := g1 & g2;"""
         )
 
     def test_tree(self):

@@ -19,7 +19,6 @@ def get_graph_by_name(graph_name: str) -> networkx.MultiDiGraph:
     return cfpq_data.graph_from_csv(graph_path)
 
 
-
 def parse_labels(graph) -> set:
     labels = set()
     for _, _, ddict in graph.edges(data=True):
