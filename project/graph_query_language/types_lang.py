@@ -61,7 +61,10 @@ class Graph:
         self.final_nodes = final_nodes
     
     def __str__(self) -> str:
-        return self.gr.__str__()
+        out = f'''Graph: 
+    nodes: {self.get_vertices().__str__()}
+    edges: {self.get_edges().__str__()}'''
+        return out
 
     def set_start_nodes(self, nodes:list[int]):
         self.gr.add_nodes_from(nodes)

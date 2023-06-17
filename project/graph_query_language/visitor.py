@@ -364,13 +364,20 @@ class Visitor(LanguageVisitor):
     def _get_graph_by_target(self, target):
         if target.var() is not None:
             name = target.var().getText()
-            graph = self.memory.get(name)
+            graph = self._get_graph_recursively(self.memory.get(name))
             if isinstance(graph, tp.Graph):
                 return graph
             raise InvalidArgument(f"target argument '{name}' is not a Graph")
         if target.graph() is not None:
             return self.visitGraph(target.graph())
         raise InvalidArgument(f"{target.getText()} not a valid argument")
+
+
+    def _get_graph_recursively(self, key):
+        # if not isinstance(key, tp.Id):
+        return key
+        # key = self.memory[key]
+        # return self._get_graph_recursively(key)
 
 
     def _get_by_binary(self, target):

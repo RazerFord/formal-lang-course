@@ -10,7 +10,7 @@ class Memory:
     
     def __setitem__(self, key : Id , value):
         if key.value in self.box and type(value) is not type(self.box[key.value]):
-            raise InvalidArgument("assigning a declared variable an argument of a different type")
+            raise InvalidArgument(f"assigning a declared variable an argument of a different type: {type(value)}, {type(self.box[key.value])}")
         self.box[key.value] = value
 
     def contains(self, key : Id) -> bool:
