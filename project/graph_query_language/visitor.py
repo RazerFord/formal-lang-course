@@ -240,8 +240,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#intersect.
     def visitIntersect(self, ctx:LanguageParser.IntersectContext):
-        item_l = self._get_graph_by_target(ctx.binary_l())
-        item_r = self._get_graph_by_target(ctx.binary_r())
+        item_l = self._get_by_binary(ctx.binary_l())
+        item_r = self._get_by_binary(ctx.binary_r())
+        if type(item_l) != type(item_r):
+            raise InvalidArgument(f"arguments of different types: {type(item_l)} != {type(item_r)}")
         return item_l.intersect(item_r)
 
 
@@ -254,8 +256,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#union.
     def visitUnion(self, ctx:LanguageParser.UnionContext):
-        item_l = self._get_graph_by_target(ctx.binary_l())
-        item_r = self._get_graph_by_target(ctx.binary_r())
+        item_l = self._get_by_binary(ctx.binary_l())
+        item_r = self._get_by_binary(ctx.binary_r())
+        if type(item_l) != type(item_r):
+            raise InvalidArgument(f"arguments of different types: {type(item_l)} != {type(item_r)}")
         return item_l.union(item_r)
 
 
@@ -364,7 +368,20 @@ class Visitor(LanguageVisitor):
             graph = self.memory.get(name)
             if isinstance(graph, tp.Graph):
                 return graph
-            raise InvalidArgument(f"target argument '{name}' is not a graph")
+            raise InvalidArgument(f"target argument '{name}' is not a Graph")
         if target.graph() is not None:
             return self.visitGraph(target.graph())
         raise InvalidArgument(f"{target.getText()} not a valid argument")
+
+
+    def _get_by_binary(self, target):
+        if target.var() is not None:
+            name = target.var().getText()
+            var = self.memory.get(name)
+            if isinstance(var, tp.Graph) or isinstance(var, tp.Bool):
+                return var
+            raise InvalidArgument(f"target argument '{name}' is not a Graph or Bool")
+        if target.graph() is not None:
+            return self.visitGraph(target.graph())
+        raise InvalidArgument(f"{target.getText()} not a valid argument")
+

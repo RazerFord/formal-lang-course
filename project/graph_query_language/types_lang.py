@@ -152,8 +152,22 @@ class Bool:
     def __init__(self, value) -> None:
         self.value = value
     
+
     def __str__(self) -> str:
         return "true" if self.value else "false"
+
+
+    def intersect(self, b: 'Bool') -> 'Bool':
+        return Bool(self.value and b.value)
+
+
+    def union(self, b: 'Bool') -> 'Bool':
+        return Bool(self.value or b.value)
+
+
+    def __eq__(self, b: 'Bool') -> bool:
+        return self.value == b.value
+
 
 class Lambda:
     def __init__(self, args, body) -> None:
