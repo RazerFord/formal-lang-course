@@ -70,6 +70,23 @@ class TestInterpreter:
         assert "edges: []" in ans
 
 
+    def test_getter(self):
+        out = Output()
+        out.acquire()
+        interpreter('''
+        g := ({1, 2, 3, 4, 5}, {(1, "a", 2), (4, "b", 3), (1, "c", 4)});
+        print get_reachable of g;
+        print get_vertices of g;
+        print get_edges of g;
+        print get_labels of g;
+        ''')
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert '(1, 2)' in ans and '(1, 4)' in ans and '(1, 3)' in ans and '(4, 3)' in ans
+        assert '[1, 2, 3, 4, 5]' in ans
+        assert "(1, 'a', 2)" in ans and "(4, 'b', 3)" in ans and "(1, 'c', 4)" in ans
+
+
     def test_map_fst_snd(self):
         out = Output()
         out.acquire()
