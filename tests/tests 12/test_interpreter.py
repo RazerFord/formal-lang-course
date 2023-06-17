@@ -154,6 +154,18 @@ class TestInterpreter:
         assert "[5, 7, 9, 10, 46, 47, 49]" in ans
 
 
+    def test_load(self):
+        out = Output()
+        out.acquire()
+        interpreter('''
+        g := load "./tests/tests 12/graph";
+        print get_edges of g;
+        ''')
+        out.release()
+        ans = read_file(Path(FILENAME))
+        assert "(3, 'a', 4)" in ans and "(4, 'c', 6)" in ans and "(4, 'a', 1)" in ans and "(1, 'c', 0)" in ans
+
+
     # def test_bind_fail(self):
     #     out = Output()
     #     out.acquire()

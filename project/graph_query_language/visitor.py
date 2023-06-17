@@ -312,7 +312,7 @@ class Visitor(LanguageVisitor):
 
     def _get_filename(self, ctx:LanguageParser.LoadContext)->str:
         if ctx.string() is not None:
-            return ctx.string()
+            return ctx.string().getText()
         if ctx.var() is not None:
             return self.memory.get(ctx.var().getText())
         raise InvalidArgument(f"{ctx.getText()} not a valid argument")
