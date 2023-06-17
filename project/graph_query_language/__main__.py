@@ -4,6 +4,8 @@ from exceptions import WrongNumberArguments
 from exceptions import InvalidArgument
 from interpreter import interpreter
 from pathlib import Path
+from utils import print_err
+
 
 def read_file(file: Path)-> str:
     text = file.open()
@@ -11,10 +13,10 @@ def read_file(file: Path)-> str:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        raise WrongNumberArguments("file name not passed")
+        print_err("file name not passed")
     file = Path(sys.argv[1])
     if not file.is_file():
-        raise ScriptNotFound("the given name is not exists")
+        print_err("the given name is not exists")
     if not file.name.endswith(".lng"):
-        raise InvalidArgument("invalid file format")
+        print_err("invalid file format")
     interpreter(read_file(file))
