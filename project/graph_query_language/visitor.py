@@ -254,14 +254,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#union.
     def visitUnion(self, ctx:LanguageParser.UnionContext):
-        graph_l = self._get_graph_by_target(ctx.binary_l())
-        graph_r = self._get_graph_by_target(ctx.binary_r())
-        enfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize()
-        enfa_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes).minimize()
-        enfa = enfa_l.union(enfa_r).minimize()
-        start_nodes = [x.value for x in enfa.start_states]
-        final_nodes = [x.value for x in enfa.final_states]
-        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+        item_l = self._get_graph_by_target(ctx.binary_l())
+        item_r = self._get_graph_by_target(ctx.binary_r())
+        return item_l.union(item_r)
+
 
     # Visit a parse tree produced by LanguageParser#in.
     def visitIn(self, ctx:LanguageParser.InContext):

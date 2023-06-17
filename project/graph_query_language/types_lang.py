@@ -114,6 +114,14 @@ class Graph:
         return Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
 
 
+    def union(self, graph: 'Graph') -> 'Graph':
+        enfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize()
+        enfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize()
+        enfa = enfa_l.union(enfa_r).minimize()
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+
 
     def normilize(self):
         index = 0
