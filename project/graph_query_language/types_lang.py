@@ -1,6 +1,12 @@
 from exceptions import InvalidArgument
 import networkx as nx
 
+import sys
+sys.path.append('..')
+from finite_automata import create_non_deterministic_automaton_from_graph
+from intersection_finite_automata import get_intersection_two_finite_automata
+
+
 class Edge:
     def __init__(self, fst, label, snd) -> None:
         self.fst = fst
@@ -90,6 +96,25 @@ class Graph:
                 result.add(label); 
         return list(result)
     
+    def intersect(self, graph: 'Graph') -> 'Graph':
+        endfa_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes)
+        endfa_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes)
+        enfa = get_intersection_two_finite_automata(endfa_l, endfa_r)
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+
+
+    def concat(self, graph: 'Graph') -> 'Graph':
+        regex_l = create_non_deterministic_automaton_from_graph(self.gr, self.start_nodes, self.final_nodes).minimize().to_regex()
+        regex_r = create_non_deterministic_automaton_from_graph(graph.gr, graph.start_nodes, graph.final_nodes).minimize().to_regex()
+        enfa = regex_l.concatenate(regex_r).to_epsilon_nfa().minimize()
+        start_nodes = [x.value for x in enfa.start_states]
+        final_nodes = [x.value for x in enfa.final_states]
+        return Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+
+
+
     def normilize(self):
         index = 0
         node_to_index = {}

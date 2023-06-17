@@ -240,26 +240,16 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#intersect.
     def visitIntersect(self, ctx:LanguageParser.IntersectContext):
-        graph_l = self._get_graph_by_target(ctx.binary_l())
-        graph_r = self._get_graph_by_target(ctx.binary_r())
-        endfa_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes)
-        endfa_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes)
-        enfa = get_intersection_two_finite_automata(endfa_l, endfa_r)
-        start_nodes = [x.value for x in enfa.start_states]
-        final_nodes = [x.value for x in enfa.final_states]
-        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+        item_l = self._get_graph_by_target(ctx.binary_l())
+        item_r = self._get_graph_by_target(ctx.binary_r())
+        return item_l.intersect(item_r)
 
 
     # Visit a parse tree produced by LanguageParser#concat.
     def visitConcat(self, ctx:LanguageParser.ConcatContext):
-        graph_l = self._get_graph_by_target(ctx.binary_l())
-        graph_r = self._get_graph_by_target(ctx.binary_r())
-        regex_l = create_non_deterministic_automaton_from_graph(graph_l.gr, graph_l.start_nodes, graph_l.final_nodes).minimize().to_regex()
-        regex_r = create_non_deterministic_automaton_from_graph(graph_r.gr, graph_r.start_nodes, graph_r.final_nodes).minimize().to_regex()
-        enfa = regex_l.concatenate(regex_r).to_epsilon_nfa().minimize()
-        start_nodes = [x.value for x in enfa.start_states]
-        final_nodes = [x.value for x in enfa.final_states]
-        return tp.Graph(graph=enfa.to_networkx(), start_nodes=start_nodes, final_nodes=final_nodes)
+        item_l = self._get_graph_by_target(ctx.binary_l())
+        item_r = self._get_graph_by_target(ctx.binary_r())
+        return item_l.concat(item_r)
 
 
     # Visit a parse tree produced by LanguageParser#union.
