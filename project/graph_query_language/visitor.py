@@ -261,11 +261,10 @@ class Visitor(LanguageVisitor):
 
     # Visit a parse tree produced by LanguageParser#in.
     def visitIn(self, ctx:LanguageParser.InContext):
-        binary_l = self._get_binary_in_l(ctx.binary_in_l())
-        binary_r = self._get_graph_by_target(ctx.binary_r())
-        res = binary_l in binary_r.get_vertices() or binary_l in binary_r.get_labels() or binary_l in binary_r.get_edges()
-        return tp.Bool(res)
-
+        item_l = self._get_binary_in_l(ctx.binary_in_l())
+        item_r = self._get_graph_by_target(ctx.binary_r())
+        return item_r.inop(item_l)
+    
 
     # Visit a parse tree produced by LanguageParser#kleene.
     def visitKleene(self, ctx:LanguageParser.KleeneContext):
