@@ -9,8 +9,8 @@ def interpreter(text_prog: str, test: bool = False) -> str:
 
     if parser.getNumberOfSyntaxErrors() != 0:
         print_err("syntax errors found")
-    # try:
-    visitor.visit(tree)
-    # except Exception as e:
-    #     print_err(e.__str__(), test)
+    try:
+        visitor.visit(tree)
+    except Exception as e:
+        print_err(e.__str__(), test)
     
