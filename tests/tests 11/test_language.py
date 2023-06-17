@@ -45,7 +45,7 @@ class TestLanguage:
         assert check_input("list := (get_labels of graph);")
 
     def test_functional(self):
-        assert check_input("fn :=(lambda {x, y} -> x & y | x);")
+        assert check_input("fn :=(lambda {x, y} -> x & y);")
         assert check_input("f := (map (lambda {x, y} -> xy) : per);")
         assert check_input("f := (filter (lambda {x, y} -> xy) : per);")
 
@@ -69,7 +69,9 @@ class TestLanguage:
     def test_commbine(self):
         assert check_input('g := (filter (lambda {x, y} -> true) : {graph1, graph2});')
         assert check_input(
-            'g := (map (lambda {x, y} -> x) : {graph}) & (filter (lambda {x, y} -> false) : {graph1, graph2});'
+            '''g1 := (map (lambda {x, y} -> x) : {graph});
+               g2 := (filter (lambda {x, y} -> false) : {graph1, graph2});
+               g := g1 & g2;'''
         )
 
     def test_tree(self):

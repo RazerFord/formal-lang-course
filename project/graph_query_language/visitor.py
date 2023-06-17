@@ -1,17 +1,16 @@
-from language.LanguageVisitor import LanguageVisitor
-from language.LanguageParser import LanguageParser
-from memory import Memory
+from project.graph_query_language.language.LanguageVisitor import LanguageVisitor
+from project.graph_query_language.language.LanguageParser import LanguageParser
+from project.graph_query_language.memory import Memory
+from project.graph_query_language.exceptions import InvalidArgument
 from typing import Union
-from exceptions import InvalidArgument
 from pathlib import Path
 
-import sys
-sys.path.append('..')
-from finite_automata import create_non_deterministic_automaton_from_graph
-from graph_info import get_graph_by_name
-from intersection_finite_automata import get_intersection_two_finite_automata
+# import sys
+# sys.path.append('..')
+from project.finite_automata import create_non_deterministic_automaton_from_graph
+from project.graph_info import get_graph_by_name
 
-import types_lang as tp
+import project.graph_query_language.types_lang as tp
 import networkx as nx
 
 

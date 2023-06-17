@@ -1,5 +1,5 @@
-from exceptions import InvalidArgument
-from types_lang import Id
+from project.graph_query_language.exceptions import InvalidArgument
+from project.graph_query_language.types_lang import Id
 
 class Memory:
     def __init__(self) -> None:

@@ -1,6 +1,6 @@
-from language_parser import build_parser
-from visitor import Visitor
-from utils import print_err
+from project.graph_query_language.language_parser import build_parser
+from project.graph_query_language.visitor import Visitor
+from project.graph_query_language.utils import print_err
 
 def interpreter(text_prog: str) -> str:
     parser = build_parser(text_prog)

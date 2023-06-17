@@ -1,11 +1,11 @@
-from exceptions import InvalidArgument
+from project.graph_query_language.exceptions import InvalidArgument
 from pyformlang.finite_automaton import EpsilonNFA
 import networkx as nx
 
-import sys
-sys.path.append('..')
-from finite_automata import create_non_deterministic_automaton_from_graph
-from intersection_finite_automata import get_intersection_two_finite_automata
+# import sys
+# sys.path.append('..')
+from project.finite_automata import create_non_deterministic_automaton_from_graph
+from project.intersection_finite_automata import get_intersection_two_finite_automata
 
 
 def create_graph_from_enfa(enfa: EpsilonNFA) -> 'Graph':
