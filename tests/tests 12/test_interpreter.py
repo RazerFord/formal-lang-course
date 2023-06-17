@@ -18,6 +18,9 @@ class Output:
         sys.stdout = self.out_print
         self.out.close()
 
+    def __del__(self):
+        Path(FILENAME).unlink()
+
 
 def read_file(file: Path) -> str:
     text = file.open()
