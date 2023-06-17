@@ -144,6 +144,10 @@ class Graph:
         return Graph(vertexes=nodes, edges=edges, start_nodes=start_nodes, final_nodes=final_nodes)
 
 
+    def __eq__(self, graph: object) -> bool:
+        return self.get_edges() == graph.get_edges()
+
+
 class Bool:
     def __init__(self, value) -> None:
         self.value = value
