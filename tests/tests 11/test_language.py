@@ -1,5 +1,5 @@
-from project.graph_query_language.parser import check_input
-from project.graph_query_language.parser import TreeListener
+from project.graph_query_language.language_parser import check_input
+from project.graph_query_language.language_parser import TreeListener
 import expected_graph as eg
 import os
 
@@ -45,9 +45,9 @@ class TestLanguage:
         assert check_input("list := (get_labels of graph);")
 
     def test_functional(self):
-        assert check_input("fn :=(lambda {x, y} -> x & y | x);")
-        assert check_input("f := (map (lambda {x, y} -> xy) per);")
-        assert check_input("f := (filter (lambda {x, y} -> xy) per);")
+        assert check_input("fn :=(lambda {x, y} -> x & y);")
+        assert check_input("f := (map (lambda {x, y} -> xy) : per);")
+        assert check_input("f := (filter (lambda {x, y} -> xy) : per);")
 
     def test_load(self):
         assert check_input("gr := (load path);")
@@ -61,15 +61,17 @@ class TestLanguage:
         assert check_input("g := g1*;")
 
     def test_fail(self):
-        assert not check_input("load (map (lambda {x, y} -> xy) per);")
+        assert not check_input("load (map (lambda {x, y} -> xy) : per);")
+        assert not check_input('g := (map (lambda {x, y} -> xy) : load "graph");')
         assert not check_input("g := g1 & g := g2;")
         assert not check_input("g := g1 in := 2;")
 
     def test_commbine(self):
-        assert check_input('g := (map (lambda {x, y} -> xy) load "graph");')
-        assert check_input('g := (filter (lambda {x, y} -> true) load "graph");')
+        assert check_input("g := (filter (lambda {x, y} -> true) : {graph1, graph2});")
         assert check_input(
-            'g := (map (lambda {x, y} -> x) load "graph") & (filter (lambda {x, y} -> false) load "graph");'
+            """g1 := (map (lambda {x, y} -> x) : {graph});
+               g2 := (filter (lambda {x, y} -> false) : {graph1, graph2});
+               g := g1 & g2;"""
         )
 
     def test_tree(self):

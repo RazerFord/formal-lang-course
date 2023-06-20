@@ -15,37 +15,36 @@ expr:
 	| var
 	| val
 	| lambda
-	| SET_START OF expr TO expr
-	| SET_FINAL OF expr TO expr
-	| ADD_START OF expr TO expr
-	| ADD_FINAL OF expr TO expr
-	| GET_START OF expr
-	| GET_FINAL OF expr
-	| GET_REACHABLE OF expr
-	| GET_VERTICES OF expr
-	| GET_EDGES OF expr
-	| GET_LABELS OF expr
-	| MAP lambda expr
-	| FILTER lambda expr
-	| LOAD (string | var)
-	| expr INTERSECT expr
-	| expr CONCAT expr
-	| expr UNION expr
-	| expr IN expr
-	| expr KLEENE
-	| expr EQUAL expr;
+	| normilize
+	| set_start
+	| set_final
+	| add_start
+	| add_final
+	| get_start
+	| get_final
+	| get_reachable
+	| get_vertices
+	| get_edges
+	| get_labels
+	| map
+	| filter
+	| load
+	| intersect
+	| concat
+	| union
+	| in
+	| kleene
+	| equal;
 
 lambda: LP LAMBDA_DEF list ARROW expr RP;
 
 var: id;
-val: integer | string | vertex | edge | list | bool | graph;
+val: integer | string | edge | list | graph;
 
-bool: TRUE | FALSE;
-string: QUOT (CHAR | DIGIT)* QUOT;
+string: STRING_LITERAL;
 integer: DIGIT+;
-vertex: integer;
 edge: LP integer COMMA string COMMA integer RP;
-item: string | integer | vertex | edge | bool | var;
+item: string | integer | edge | var | list;
 list: LB RB | LB item (COMMA item)* RB;
 graph: LP list COMMA list RP;
 
@@ -53,31 +52,42 @@ id: (CHAR (CHAR | DIGIT)*);
 CHAR: [a-zA-Z_];
 DIGIT: [0-9];
 
-SET_START: 'set_start';
-SET_FINAL: 'set_final';
-ADD_START: 'add_start';
-ADD_FINAL: 'add_final';
-GET_START: 'get_start';
-GET_FINAL: 'get_final';
-GET_REACHABLE: 'get_reachable';
-GET_VERTICES: 'get_vertices';
-GET_EDGES: 'get_edges';
-GET_LABELS: 'get_labels';
-MAP: 'map';
+normilize: 'normilize' target;
+set_start: 'set_start' of source to target;
+set_final: 'set_final' of source to target;
+add_start: 'add_start' of source to target;
+add_final: 'add_final' of source to target;
+target: var | graph;
+source: var | integer | list;
+
+get_start: 'get_start' of target;
+get_final: 'get_final' of target;
+
+get_reachable: 'get_reachable' of target;
+get_vertices: 'get_vertices' of target;
+get_edges: 'get_edges' of target;
+get_labels: 'get_labels' of target;
+
+map: 'map' (lambda | var) ':' iterable;
+filter: 'filter' (lambda | var) ':' iterable;
+iterable: list | var;
 LAMBDA_DEF: 'lambda';
-LOAD: 'load';
-FILTER: 'filter';
+load: 'load' (string | var);
 ARROW: '->';
-OF: 'of';
-TO: 'to';
-INTERSECT: '&';
-CONCAT: '.';
-UNION: '|';
-IN: 'in';
-KLEENE: '*';
-EQUAL: '=';
-TRUE: 'true';
-FALSE: 'false';
+of: 'of';
+to: 'to';
+intersect: binary_l '&' binary_r;
+concat: binary_l '.' binary_r;
+union: binary_l '|' binary_r;
+in: binary_in_l 'in' binary_r;
+kleene: binary_l '*';
+equal: binary_equal_l '=' binary_equal_r;
+binary_l: graph | var | string;
+binary_r: graph | var | string;
+binary_in_l: var | integer | string | edge;
+binary_equal_l: var | val;
+binary_equal_r: var | val;
+
 COMMA: ',';
 QUOT: '"';
 LP: '(';
@@ -87,3 +97,4 @@ RB: '}';
 WS: [ \n\t\r]+ -> channel(HIDDEN);
 COMMENT: '//' ~[\n]* -> skip;
 SEMICOLON: ';';
+STRING_LITERAL: QUOT (~["\\] | '\\' .)* QUOT;
